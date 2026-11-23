@@ -1341,11 +1341,10 @@
       var ts = tasksFor(c.id);
       var r = recordOf(k, c.id);
       var done = r ? r.done : 0, pct = r ? r.pct : 0;
-      var tail = ui.dayOffset === off ? '' : '';
       html += '<button class="daysel' + (ui.dayOffset===off ? ' on' : '') + '" data-act="pick-day" data-off="' + off + '" role="tab" aria-selected="' + (ui.dayOffset===off) + '" aria-label="' + DAY_LABELS[-off] + ' ' + fmtDate(k) + '">' +
         '<b>' + DAY_LABELS[-off] + '</b>' +
         '<span>' + (off===0 ? fmtDate(k) : fmtDate(k)) + '</span>' +
-        '<i>' + (ts.length ? (done + '/' + ts.length + ' · ' + pct + '%') : '계획 없음') + tail + '</i>' +
+        '<i>' + (ts.length ? (done + '/' + ts.length + ' · ' + pct + '%') : '계획 없음') + '</i>' +
       '</button>';
     }
     el.innerHTML = html;
