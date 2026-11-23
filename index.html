@@ -135,12 +135,20 @@
   /* ── 오늘의 계획 ── */
   .tasklist{display:flex;flex-direction:column;gap:9px}
   .task{
-    display:flex;align-items:center;gap:12px;width:100%;text-align:left;
-    background:#fff;border-radius:18px;padding:13px 13px 13px 12px;box-shadow:var(--shadow-sm);
+    display:flex;align-items:stretch;gap:0;width:100%;text-align:left;overflow:hidden;
+    background:#fff;border-radius:18px;padding:0;box-shadow:var(--shadow-sm);
     border:1.5px solid #f4f6fa;transition:transform .12s ease,background .2s ease,border-color .2s ease;
     min-height:64px;
   }
   .task:active{transform:scale(.985)}
+  .task .tmainbtn{display:flex;align-items:center;gap:12px;flex:1;min-width:0;text-align:left;padding:13px 6px 13px 12px;background:none;min-height:62px}
+  .tphotobtn{
+    width:58px;flex:none;display:grid;place-items:center;font-size:17px;color:var(--ink-3);
+    border-left:1px solid var(--line);background:#fbfcfe;position:relative;padding:0;
+  }
+  .tphotobtn:active{background:var(--soft)}
+  .tphotobtn img{width:42px;height:42px;border-radius:10px;object-fit:cover;display:block;box-shadow:var(--shadow-sm)}
+  .task .ttag{display:inline-block;font-size:10px;font-weight:800;color:var(--c);background:var(--soft);border-radius:7px;padding:1px 5px;margin-left:5px;vertical-align:1px;white-space:nowrap}
   .task .ck{
     width:28px;height:28px;border-radius:10px;border:2.5px solid #dde2ea;flex:none;
     display:grid;place-items:center;font-size:15px;color:#fff;background:#fff;transition:all .18s ease;
@@ -314,6 +322,59 @@
   .dditem:last-child{border-bottom:0}
   .dditem .dcheck{width:22px;height:22px;border-radius:8px;background:var(--c);color:#fff;display:grid;place-items:center;font-size:11.5px;flex:none}
 
+  /* ── 날짜 선택 (오늘 · 어제 · 그저께) ── */
+  .datechips{display:flex;gap:6px;margin-top:12px}
+  .daysel{
+    flex:1;min-width:0;border-radius:15px;background:#fff;box-shadow:var(--shadow-sm);padding:8px 5px;
+    text-align:center;border:1.5px solid transparent;transition:all .15s ease;
+  }
+  .daysel b{display:block;font-size:13.5px;font-weight:800;letter-spacing:-.02em;color:var(--ink-2)}
+  .daysel span{display:block;font-size:10.5px;font-weight:700;color:var(--ink-3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .daysel i{display:block;font-size:10.5px;font-weight:800;font-style:normal;color:var(--c);margin-top:2px}
+  .daysel.on{background:var(--c);background:linear-gradient(135deg,var(--c),var(--c2));border-color:transparent;box-shadow:0 6px 16px var(--csh)}
+  .daysel.on b,.daysel.on span,.daysel.on i{color:#fff}
+  .daynote{margin-top:9px;font-size:11.5px;font-weight:700;color:#7c5a12;background:#fffbeb;border:1px solid #fde68a;border-radius:13px;padding:9px 11px;line-height:1.5}
+
+  /* ── 사진 인증 ── */
+  .photobtns{display:flex;gap:8px}
+  .photobtns .btn-primary,.photobtns .btn-ghost{flex:1}
+  .photo-big{width:100%;border-radius:18px;background:#0f172a;display:grid;place-items:center;overflow:hidden;margin:2px 0 10px}
+  .photo-big img{max-width:100%;max-height:56vh;display:block;object-fit:contain}
+  .photometa{display:flex;justify-content:space-between;gap:8px;font-size:12px;font-weight:700;color:var(--ink-3);margin-bottom:8px;flex-wrap:wrap}
+  .hero-lockrow{display:flex;justify-content:flex-end;gap:6px;margin-top:8px;position:relative}
+  .pthumb{width:34px;height:34px;border-radius:10px;object-fit:cover;display:block;flex:none}
+
+  /* ── 부모: 삼 남매 한눈에 ── */
+  .dash{display:flex;flex-direction:column;gap:9px}
+  .dashkid{border-radius:17px;background:#fff;box-shadow:var(--shadow-sm);padding:11px 12px;border:1.5px solid #f4f6fa}
+  .dashkid .dk-head{display:flex;align-items:center;gap:7px;position:relative}
+  .dashkid .dk-emoji{font-size:19px;line-height:1}
+  .dashkid .dk-name{font-size:14.5px;font-weight:800;letter-spacing:-.02em}
+  .dashkid .dk-grade{font-size:11px;font-weight:700;color:var(--ink-3)}
+  .dashkid .dk-pts{margin-left:auto;font-size:13.5px;font-weight:900;color:var(--c)}
+  .dk-days{display:flex;gap:6px;margin-top:8px}
+  .dk-day{flex:1;min-width:0;border-radius:11px;background:#f6f9fe;padding:6px 4px;text-align:center}
+  .dk-day span{display:block;font-size:10px;font-weight:700;color:var(--ink-3)}
+  .dk-day b{display:block;font-size:12.5px;font-weight:800;color:var(--ink-2);margin-top:1px}
+  .dk-day.full{background:var(--soft)}
+  .dk-day.full b{color:var(--c)}
+  .dkbar{height:4px;border-radius:3px;background:#e3e9f4;margin-top:4px;overflow:hidden}
+  .dkbar i{display:block;height:100%;background:var(--c);border-radius:3px}
+  .dk-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px}
+  .dk-foot .pin-meta{font-size:11px;color:var(--ink-3);font-weight:700}
+  .recphotos{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .recphoto{position:relative;aspect-ratio:1/1;border-radius:12px;overflow:hidden;background:#f1f5fb;padding:0}
+  .recphoto img{width:100%;height:100%;object-fit:cover;display:block}
+  .recphoto .rpname{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg,rgba(15,23,42,0),rgba(15,23,42,.76));color:#fff;font-size:9.5px;font-weight:800;padding:10px 3px 3px;text-align:center}
+
+  /* ── 클라우드 동기화 ── */
+  .cloudstat{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;border-radius:13px;padding:9px 11px;background:#f6f9fe;color:var(--ink-2);margin-bottom:10px;line-height:1.4}
+  .cloudstat .dotc{width:8px;height:8px;border-radius:50%;background:currentColor;flex:none}
+  .cloudstat.on{background:#eefaf3;color:#15803d}
+  .cloudstat.off{background:#fffbeb;color:#92620a}
+  .sqldoc{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;line-height:1.55;background:#f6f9fe;border:1px solid #e6ecf7;border-radius:12px;padding:10px;white-space:pre-wrap;word-break:break-all;color:#334155;max-height:190px;overflow:auto;margin-top:6px}
+  .kinp{width:78px;min-height:42px;border-radius:11px;border:1.5px solid #e6e9f0;background:#fbfcfe;text-align:center;font-weight:800;letter-spacing:.08em;padding:0 6px}
+
   /* ── 하단 내비 ── */
   .bottomnav{
     position:fixed;left:0;right:0;bottom:0;z-index:30;
@@ -379,10 +440,12 @@
 
   <main id="main">
     <section class="view" data-view="today">
+      <div class="datechips" id="dateChips" role="tablist" aria-label="날짜 선택"></div>
+      <div id="dayNoteSlot"></div>
       <div id="heroSlot"></div>
       <div class="section">
         <div class="sec-head">
-          <div class="sec-title">📋 오늘의 계획</div>
+          <div class="sec-title" id="taskSecTitle">📋 오늘의 계획</div>
           <div class="sec-note" id="todayCount">0개</div>
         </div>
         <div class="tasklist" id="taskList"></div>
@@ -513,6 +576,8 @@
 
 <div class="fx" id="fx"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<input type="file" id="photoCam" accept="image/*" capture="environment" hidden>
+<input type="file" id="photoAlbum" accept="image/*" hidden>
 <div id="modalRoot"></div>
 
 <script>
@@ -522,6 +587,30 @@
   /* ═══════════ 상수 · 유틸 ═══════════ */
   var STORAGE_KEY = 'siblings-point-planner-v1';
   var WD = ['일','월','화','수','목','금','토'];
+  var DAY_LABELS = ['오늘','어제','그저께'];
+  /* 클라우드(Supabase) 기본 주소: 사용자가 보내 준 프로젝트. anon 키가 비어 있으면 로컬 저장 모드로 동작한다. */
+  var DEFAULT_CLOUD_URL = 'https://ykpgnpvpraisgrlmwbco.supabase.co';
+  var DEFAULT_CLOUD_KEY = 'sb_publishable_od-4glPyjRs8iaSim6Ym7Q_9cJDzjP1';   /* Supabase publishable(anon) 키 */
+  /* 부모 모드에 보여 주는 Supabase 준비 SQL (한 번만 실행) */
+  var CLOUD_SQL =
+    '-- 1) 가족 상태 저장 테이블\n' +
+    'create table if not exists public.family_state (\n' +
+    '  id text primary key,\n' +
+    '  state jsonb not null,\n' +
+    '  updated_at timestamptz not null default now()\n' +
+    ');\n' +
+    'alter table public.family_state enable row level security;\n' +
+    'drop policy if exists family_state_rw on public.family_state;\n' +
+    'create policy family_state_rw on public.family_state\n' +
+    '  for all to anon using (true) with check (true);\n' +
+    '-- 2) 인증 사진 버킷 (Public)\n' +
+    "insert into storage.buckets (id, name, public)\n" +
+    "  values ('proof-photos','proof-photos', true)\n" +
+    '  on conflict (id) do nothing;\n' +
+    'drop policy if exists proof_photos_rw on storage.objects;\n' +
+    'create policy proof_photos_rw on storage.objects\n' +
+    "  for all to anon using (bucket_id = 'proof-photos')\n" +
+    "  with check (bucket_id = 'proof-photos');";
   function pad(n){ return String(n).padStart(2,'0'); }
   function dateKey(d){ d = d || new Date(); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
   function addDays(d,n){ var x = new Date(d.getTime()); x.setDate(x.getDate()+n); return x; }
@@ -603,7 +692,7 @@
     ];
 
     return {
-      version: 3,
+      version: 4,
       children: kids,
       tasks: tasks,
       rewards: rewards,
@@ -612,7 +701,18 @@
       /* 진행도 스냅샷: { 'YYYY-MM-DD': { 아이id: {done,total,pct,points,items,updatedAt} } }
          그날 체크한 상태를 그대로 복사해 두어, 나중에 항목을 수정·삭제해도 지난 주·달 기록이 바뀌지 않는다. */
       snapshots: {},
-      settings: { pin:'0000', sound:true }
+      settings: {
+        pin:'0000', sound:true,
+        /* 아이별 4자리 비밀번호 (아이 탭을 바꿀 때 물어본다) */
+        kidPins: {
+          jimin:  {pin:'1111', lock:true},
+          jiho:   {pin:'2222', lock:true},
+          jiyoon: {pin:'3333', lock:true}
+        },
+        /* Supabase 연결 설정 (비어 있으면 이 기기 localStorage에만 저장) */
+        cloud: { url: DEFAULT_CLOUD_URL, key: DEFAULT_CLOUD_KEY, enabled: true, table:'family_state', bucket:'proof-photos', row:'family', lastSync:0, lastError:'' }
+      },
+      updatedAt: Date.now()
     };
   }
 
@@ -641,6 +741,18 @@
     if(!s.settings || typeof s.settings !== 'object') s.settings = {pin:'0000', sound:true};
     if(typeof s.settings.pin !== 'string' || !/^\d{4}$/.test(s.settings.pin)) s.settings.pin = '0000';
     if(typeof s.settings.sound !== 'boolean') s.settings.sound = true;
+    /* v4: 아이별 비밀번호 · 클라우드 설정 */
+    if(!s.settings.cloud || typeof s.settings.cloud !== 'object') s.settings.cloud = {};
+    var cl = s.settings.cloud;
+    if(typeof cl.url !== 'string') cl.url = '';
+    if(typeof cl.key !== 'string') cl.key = '';
+    if(typeof cl.table !== 'string' || !cl.table) cl.table = 'family_state';
+    if(typeof cl.bucket !== 'string' || !cl.bucket) cl.bucket = 'proof-photos';
+    if(typeof cl.row !== 'string' || !cl.row) cl.row = 'family';
+    if(typeof cl.lastSync !== 'number') cl.lastSync = 0;
+    if(typeof cl.lastError !== 'string') cl.lastError = '';
+    if(typeof cl.enabled !== 'boolean') cl.enabled = !!(cl.key || '').trim() || !cl.url;
+    if(typeof s.updatedAt !== 'number') s.updatedAt = 0;
     /* v1(핑크 계열) → v2(블루 계열) 팔레트 이전: 예전 기본색이 그대로 남아 있으면 새 색으로 바꿈다 */
     var upgrading = !s.version || s.version < 2;
     var PALETTE = {
@@ -663,12 +775,26 @@
         if(c.emoji === '🌸') c.emoji = '💙';
       }
     });
+    /* v4: 아이별 4자리 비밀번호 (기본 지민 1111 · 지호 2222 · 지윤 3333, 잠금 켜짐) */
+    var DEF_KID_PINS = ['1111','2222','3333'];
+    if(!s.settings.kidPins || typeof s.settings.kidPins !== 'object') s.settings.kidPins = {};
+    s.children.forEach(function(c,i){
+      var kp = s.settings.kidPins[c.id];
+      if(!kp || typeof kp !== 'object') kp = {};
+      if(typeof kp.pin !== 'string' || !/^\d{4}$/.test(kp.pin)) kp.pin = DEF_KID_PINS[i] || '1234';
+      if(typeof kp.lock !== 'boolean') kp.lock = true;
+      s.settings.kidPins[c.id] = kp;
+    });
+    Object.keys(s.settings.kidPins).forEach(function(id){
+      if(!s.children.some(function(c){ return c.id === id; })) delete s.settings.kidPins[id];
+    });
     s.tasks = s.tasks.filter(function(t){ return t && t.title; }).map(function(t,i){
       t.id = t.id || uid();
       t.points = Math.max(0, parseInt(t.points,10) || 0);
       t.order = (typeof t.order === 'number') ? t.order : i;
       t.time = t.time || '';
       t.note = t.note || '';
+      t.needPhoto = !!t.needPhoto;
       if(!s.children.some(function(c){ return c.id === t.childId; })) t.childId = s.children[0].id;
       return t;
     });
@@ -688,8 +814,30 @@
       return e;
     });
     normalizeSnapshots(s);     /* v3: 진행도 스냅샷 정리 · 없는 지난 날은 기록에서 되살린다 */
-    s.version = 3;
+    normalizeChecks(s);        /* v4: 체크 기록 · 인증 사진 구조 정리 */
+    s.version = 4;
     return s;
+  }
+
+  /* v3까지의 체크 기록은 {ts, ledgerId} 였고, v4부터 사진이 붙는다: {ts, ledgerId, photo:{src,ts,w,h,mode,path}} */
+  function normalizeChecks(s){
+    if(!s.checks || typeof s.checks !== 'object') s.checks = {};
+    Object.keys(s.checks).forEach(function(dayK){
+      var day = s.checks[dayK];
+      if(!day || typeof day !== 'object'){ delete s.checks[dayK]; return; }
+      Object.keys(day).forEach(function(cid){
+        var b = day[cid];
+        if(!b || typeof b !== 'object'){ delete day[cid]; return; }
+        Object.keys(b).forEach(function(tid){
+          var e = b[tid];
+          if(!e){ delete b[tid]; return; }
+          if(typeof e === 'number' || typeof e === 'string'){ b[tid] = {ts: Date.now()}; e = b[tid]; }
+          if(typeof e.photo === 'string') e.photo = {src: e.photo, ts: e.ts || Date.now(), mode: 'local'};
+          if(e.photo && (typeof e.photo.src !== 'string' || !e.photo.src)) delete e.photo;
+          if(e.photo && typeof e.photo.ts !== 'number') e.photo.ts = e.ts || Date.now();
+        });
+      });
+    });
   }
 
   /* ── 진행도 스냅샷 저장 구조 (v3) ──
@@ -746,10 +894,36 @@
       });
     });
   }
-  function save(){
-    if(!storageOK) return;
-    try{ window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-    catch(e){ storageOK = false; showStorageWarning(); }
+  function save(skipCloud){
+    if(storageOK){
+      try{ window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+      catch(e){
+        var freed = false;
+        for(var i=0;i<3 && !freed;i++) freed = dropOldestPhoto();
+        if(freed){
+          toast('저장 공간이 부족해 오래된 인증 사진을 정리하고 다시 저장했어요');
+          try{ window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+          catch(e2){ storageOK = false; showStorageWarning(); }
+        } else { storageOK = false; showStorageWarning(); }
+      }
+    }
+    if(!skipCloud) queueCloudPush();
+  }
+  /* 공간이 모자랄 때 가장 오래된 인증 사진 1장을 본문에서 빼서 자리를 만든다 (체크·포인트 기록은 그대로) */
+  function dropOldestPhoto(){
+    var list = photoList(60);
+    if(!list.length) return false;
+    var oldest = list[list.length-1];
+    var day = state.checks[oldest.dayKey] && state.checks[oldest.dayKey][oldest.kidId];
+    var e = day && day[oldest.taskId];
+    if(e && e.photo){ delete e.photo; return true; }
+    return false;
+  }
+  var cloudPushTimer = null;
+  function queueCloudPush(){
+    if(!cloudReady() || cloudCfg().needsSetup || !cloudCfg().verified) return;
+    clearTimeout(cloudPushTimer);
+    cloudPushTimer = setTimeout(function(){ cloudPush(true); }, 1800);
   }
   function showStorageWarning(){
     var w = document.getElementById('storageWarn');
@@ -785,8 +959,16 @@
     monthY: new Date().getFullYear(),
     monthM: new Date().getMonth(),
     selDay: dateKey(),
-    modalConfirm: null
+    modalConfirm: null,
+    dayOffset: 0,          /* 0=오늘, -1=어제, -2=그저께 */
+    kidUnlocked: {},       /* 이번 세션에서 비밀번호를 넣은 아이 */
+    kpinBuffer: '',
+    kpinError: '',
+    pendingPhoto: null,    /* 사진을 올릴 항목 {taskId, dayKey} */
+    cloudBusy: false
   };
+  /* 앱을 연 기기의 기본 아이 페이지는 바로 열어 둔다 (다른 아이 탭은 비밀번호 필요) */
+  ui.kidUnlocked[ui.kidId] = true;
   var currentDay = dateKey();
   var lastPointsShown = {};
 
@@ -819,6 +1001,54 @@
     if(!ts.length) return 0;
     return Math.round(doneCount(key,id)/ts.length*100);
   }
+  function selKey(){ return dateKey(addDays(new Date(), ui.dayOffset || 0)); }
+  function fmtTime(ts){ var d = new Date(ts || Date.now()); return pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+  function findTask(id){
+    for(var i=0;i<state.tasks.length;i++){ if(state.tasks[i].id===id) return state.tasks[i]; }
+    return null;
+  }
+  function ensureBucket(dayKey, kidId){
+    state.checks[dayKey] = state.checks[dayKey] || {};
+    state.checks[dayKey][kidId] = state.checks[dayKey][kidId] || {};
+    return state.checks[dayKey][kidId];
+  }
+  function kidPinCfg(id){
+    var kp = (state.settings && state.settings.kidPins && state.settings.kidPins[id]) || null;
+    if(!kp) return {pin: '', lock: false};
+    return kp;
+  }
+  function kidPinEnabled(id){ var kp = kidPinCfg(id); return !!(kp.lock && /^\d{4}$/.test(kp.pin || '')); }
+  function kidLocked(id){
+    if(ui.parentUnlocked) return false;
+    if(!kidPinEnabled(id)) return false;
+    return !ui.kidUnlocked[id];
+  }
+  /* 인증 사진 모으기 (최근 날짜 순) */
+  function photoList(days){
+    var out = [];
+    var keys = Object.keys(state.checks || {}).filter(function(k){ return /^\d{4}-\d{2}-\d{2}$/.test(k); }).sort().reverse();
+    var limit = days || 30;
+    var cutoff = dateKey(addDays(new Date(), -(limit)));
+    keys.forEach(function(k){
+      if(k < cutoff) return;
+      var day = state.checks[k] || {};
+      Object.keys(day).forEach(function(cid){
+        var b = day[cid] || {};
+        Object.keys(b).forEach(function(tid){
+          var e = b[tid];
+          if(!e || !e.photo || !e.photo.src) return;
+          var t = findTask(tid);
+          out.push({dayKey:k, kidId:cid, taskId:tid, title: t ? t.title : '인증 사진', photo:e.photo});
+        });
+      });
+    });
+    out.sort(function(a,b){ return (b.photo.ts||0)-(a.photo.ts||0); });
+    return out;
+  }
+  function photosFor(kidId, days){
+    return photoList(days || 30).filter(function(p){ return p.kidId===kidId; });
+  }
+  function recentPhotos(n){ return photoList(14).slice(0, n || 8); }
   function streakOf(id){
     var n = 0;
     for(var i=0;i<60;i++){
@@ -964,10 +1194,10 @@
   }
 
   /* ═══════════ 포인트 기록 ═══════════ */
-  function addEntry(childId, amount, type, memo, extra){
+  function addEntry(childId, amount, type, memo, extra, dayKey){
     var e = {
       id: uid(), childId: childId, amount: amount, type: type, memo: memo || '',
-      date: currentDay, ts: Date.now()
+      date: dayKey || currentDay, ts: Date.now()
     };
     if(extra) for(var k in extra){ if(Object.prototype.hasOwnProperty.call(extra,k)) e[k] = extra[k]; }
     state.ledger.push(e);
@@ -976,43 +1206,66 @@
 
   /* ═══════════ 액션: 체크 / 교환 ═══════════ */
   function toggleTask(taskId){
-    var t = null;
-    for(var i=0;i<state.tasks.length;i++){ if(state.tasks[i].id===taskId){ t = state.tasks[i]; break; } }
+    var t = findTask(taskId);
     if(!t) return;
-    var before = pctOf(currentDay, t.childId);
-    state.checks[currentDay] = state.checks[currentDay] || {};
-    state.checks[currentDay][t.childId] = state.checks[currentDay][t.childId] || {};
-    var bucket = state.checks[currentDay][t.childId];
+    var day = selKey();
+    if(kidLocked(t.childId)){
+      ui.kpinBuffer = ''; ui.kpinError = '';
+      render(); toast('먼저 비밀번호를 넣어 주세요');
+      return;
+    }
+    var bucket = ensureBucket(day, t.childId);
+    var cur = bucket[t.id];
+    /* 이미 완료한 항목에 사진이 있으면, 누를 때 사진을 크게 보여 준다 (체크 취소는 사진 화면에서) */
+    if(cur && cur.photo){ openPhotoView(t.childId, day, t.id); return; }
+    if(cur){ uncheckTask(day, t.childId, t.id); return; }
+    if(t.needPhoto){ photoSheet(t.id, day); toast('이 항목은 사진 인증이 필요해요'); return; }
+    checkTask(day, t.childId, t.id);
+  }
 
-    if(bucket[t.id]){
-      var lid = bucket[t.id].ledgerId;
-      delete bucket[t.id];
-      if(lid){
-        for(var j=state.ledger.length-1;j>=0;j--){
-          if(state.ledger[j].id===lid){ state.ledger.splice(j,1); break; }
-        }
-      }
-      refreshSnapshot(currentDay, t.childId);
-      save(); render();
-      chime(false);
-      toast('체크를 취소했어요 · -' + t.points + 'P');
-    } else {
-      var e = addEntry(t.childId, t.points, 'earn', t.title, {taskId: t.id});
-      bucket[t.id] = {ts: Date.now(), ledgerId: e.id};
-      refreshSnapshot(currentDay, t.childId);
-      save(); render();
-      chime(true); vibrate(18);
-      toast('딩동! ' + t.title + ' +' + t.points + 'P');
-      confetti(14);
-      var after = pctOf(currentDay, t.childId);
-      if(before < 100 && after === 100){
-        setTimeout(function(){
-          toast('🎉 오늘 계획 모두 완료! 정말 잘했어요', 'big');
-          confetti(34);
-          chime(true);
-        }, 260);
+  function checkTask(day, kidId, taskId){
+    var t = findTask(taskId);
+    if(!t) return;
+    if(kidLocked(kidId)){ toast('먼저 비밀번호를 넣어 주세요'); return; }
+    var bucket = ensureBucket(day, kidId);
+    if(bucket[taskId]) return;                       /* 중복 적립 방지 */
+    var before = pctOf(day, kidId);
+    var e = addEntry(kidId, t.points, 'earn', t.title, {taskId: t.id}, day);
+    bucket[taskId] = {ts: Date.now(), ledgerId: e.id};
+    refreshSnapshot(day, kidId);
+    state.updatedAt = Date.now();
+    save(); render();
+    chime(true); vibrate(18);
+    toast((ui.dayOffset < 0 ? DAY_LABELS[-ui.dayOffset] + ' 숙제 완료! ' : '딩동! ') + t.title + ' +' + t.points + 'P');
+    confetti(14);
+    var after = pctOf(day, kidId);
+    if(before < 100 && after === 100){
+      setTimeout(function(){
+        toast('🎉 ' + (ui.dayOffset < 0 ? DAY_LABELS[-ui.dayOffset] : '오늘') + ' 계획을 모두 마쳤어요!', 'big');
+        confetti(34);
+        chime(true);
+      }, 260);
+    }
+  }
+
+  function uncheckTask(day, kidId, taskId){
+    var t = findTask(taskId);
+    if(!t) return;
+    if(kidLocked(kidId)){ toast('먼저 비밀번호를 넣어 주세요'); return; }
+    var bucket = ensureBucket(day, kidId);
+    var cur = bucket[taskId];
+    if(!cur) return;
+    delete bucket[taskId];
+    if(cur.ledgerId){
+      for(var j=state.ledger.length-1;j>=0;j--){
+        if(state.ledger[j].id===cur.ledgerId){ state.ledger.splice(j,1); break; }
       }
     }
+    refreshSnapshot(day, kidId);
+    state.updatedAt = Date.now();
+    save(); render();
+    chime(false);
+    toast('체크를 취소했어요 · -' + t.points + 'P');
   }
 
   function openRedeem(rewardId){
@@ -1021,6 +1274,7 @@
     if(!r) return;
     var c = kid(ui.kidId);
     var p = pointsOf(c.id);
+    if(kidLocked(c.id)){ toast('먼저 ' + c.name + '의 비밀번호를 넣어 주세요'); return; }
     if(p < r.cost){ toast('포인트가 ' + (r.cost-p) + 'P 더 필요해요'); return; }
     openSheet(
       '<h3>' + esc(r.emoji) + ' ' + esc(r.title) + '</h3>' +
@@ -1041,6 +1295,7 @@
     for(var i=0;i<state.rewards.length;i++){ if(state.rewards[i].id===rewardId){ r = state.rewards[i]; break; } }
     if(!r) return;
     var cid = ui.kidId;
+    if(kidLocked(cid)){ closeModal(); toast('먼저 비밀번호를 넣어 주세요'); return; }
     if(pointsOf(cid) < r.cost){ closeModal(); toast('포인트가 부족해요'); return; }
     addEntry(cid, -r.cost, 'redeem', r.emoji + ' ' + r.title, {rewardId: r.id});
     save(); closeModal(); render();
@@ -1064,6 +1319,7 @@
       (now.getMonth()+1) + '월 ' + now.getDate() + '일 ' + WD[now.getDay()] + '요일';
 
     renderTabs();
+    renderDateChips();
     renderHero();
     renderToday();
     renderShop();
@@ -1072,6 +1328,27 @@
     renderNav();
     var views = document.querySelectorAll('.view');
     for(var i=0;i<views.length;i++){ views[i].hidden = views[i].getAttribute('data-view') !== ui.view; }
+  }
+
+  /* 오늘 · 어제 · 그저께 날짜 선택 칩 */
+  function renderDateChips(){
+    var el = document.getElementById('dateChips');
+    if(!el) return;
+    var c = kid(ui.kidId);
+    var html = '';
+    for(var off=0; off>=-2; off--){
+      var d = addDays(new Date(), off), k = dateKey(d);
+      var ts = tasksFor(c.id);
+      var r = recordOf(k, c.id);
+      var done = r ? r.done : 0, pct = r ? r.pct : 0;
+      var tail = ui.dayOffset === off ? '' : '';
+      html += '<button class="daysel' + (ui.dayOffset===off ? ' on' : '') + '" data-act="pick-day" data-off="' + off + '" role="tab" aria-selected="' + (ui.dayOffset===off) + '" aria-label="' + DAY_LABELS[-off] + ' ' + fmtDate(k) + '">' +
+        '<b>' + DAY_LABELS[-off] + '</b>' +
+        '<span>' + (off===0 ? fmtDate(k) : fmtDate(k)) + '</span>' +
+        '<i>' + (ts.length ? (done + '/' + ts.length + ' · ' + pct + '%') : '계획 없음') + tail + '</i>' +
+      '</button>';
+    }
+    el.innerHTML = html;
   }
 
   function renderTabs(){
@@ -1093,23 +1370,33 @@
 
   function renderHero(){
     var c = kid(ui.kidId);
+    var day = selKey();
     var p = pointsOf(c.id);
-    var pct = pctOf(currentDay, c.id);
+    var pct = pctOf(day, c.id);
     var ts = tasksFor(c.id);
-    var done = doneCount(currentDay, c.id);
+    var done = doneCount(day, c.id);
+    var locked = kidLocked(c.id);
     var circ = 2 * Math.PI * 19;
     var cheap = null;
     state.rewards.forEach(function(r){ if(r.cost<=p && (!cheap || r.cost>cheap.cost)) cheap = r; });
     var hint = cheap ? ('다음 보상까지<br>' + (cheap.cost) + 'P · 지금 ' + p + 'P') : '상점에서<br>보상을 골라요';
     var was = lastPointsShown[c.id];
     lastPointsShown[c.id] = p;
+    var dayLabel = ui.dayOffset === 0 ? '오늘' : DAY_LABELS[-ui.dayOffset];
+    var lockRow = '';
+    if(locked){
+      lockRow = '<div class="hero-lockrow"><span class="hint">🔒 ' + esc(c.name) + '의 비밀번호를 넣으면 체크할 수 있어요</span></div>';
+    } else if(kidPinEnabled(c.id)){
+      lockRow = '<div class="hero-lockrow"><button class="mini" data-act="lock-kid" aria-label="이 페이지 잠그기">🔓 이 페이지 잠그기</button></div>';
+    }
     document.getElementById('heroSlot').innerHTML =
       '<div class="hero">' +
         '<div class="hero-top">' +
           '<div class="avatar">' + esc(c.emoji) + '</div>' +
           '<div>' +
             '<div class="hero-name">' + esc(c.name) + '<span class="grade">' + esc(c.grade) + '</span></div>' +
-            '<div class="hero-sub">오늘 ' + done + '/' + ts.length + ' 완료' + (streakOf(c.id) > 0 ? ' · ' + streakOf(c.id) + '일 연속 🔥' : '') + '</div>' +
+            '<div class="hero-sub">' + dayLabel + ' ' + done + '/' + ts.length + ' 완료' +
+              ((ui.dayOffset === 0 && streakOf(c.id) > 0) ? ' · ' + streakOf(c.id) + '일 연속 🔥' : '') + '</div>' +
           '</div>' +
           '<div class="ringwrap">' +
             '<svg class="ring" viewBox="0 0 44 44" aria-hidden="true">' +
@@ -1124,6 +1411,7 @@
           '<div class="pointscap">P 모았어요</div>' +
           '<div class="goalhint">' + hint + '</div>' +
         '</div>' +
+        lockRow +
       '</div>';
     if(was!==undefined && was!==p){
       var b = document.querySelector('.pointsbig');
@@ -1131,42 +1419,90 @@
     }
   }
 
+  function kidGateHTML(c){
+    var dots = '';
+    for(var i=0;i<4;i++) dots += '<span class="dot' + (ui.kpinBuffer.length>i?' on':'') + '"></span>';
+    return '<div class="card gate" style="margin-top:2px">' +
+      '<div class="gemoji">🔒</div>' +
+      '<h2>' + esc(c.emoji) + ' ' + esc(c.name) + '의 페이지</h2>' +
+      '<p>4자리 비밀번호를 넣어 주세요<br>부모님은 ⚙️ 부모 모드(PIN)에서 모두 볼 수 있어요</p>' +
+      '<div class="dots" id="kpinDots">' + dots + '</div>' +
+      '<div class="keypad">' +
+        [1,2,3,4,5,6,7,8,9].map(function(n){ return '<button class="key" data-act="kpin" data-k="' + n + '">' + n + '</button>'; }).join('') +
+        '<button class="key del" data-act="kpin-del" aria-label="지우기">⌫</button>' +
+        '<button class="key" data-act="kpin" data-k="0">0</button>' +
+        '<button class="key del" data-act="kpin-clear" aria-label="전체 지우기">C</button>' +
+      '</div>' +
+      '<div class="errmsg" id="kpinErr">' + esc(ui.kpinError) + '</div>' +
+    '</div>';
+  }
+
   function renderToday(){
     var c = kid(ui.kidId);
     var ts = tasksFor(c.id);
-    var ck = checksOf(currentDay, c.id);
+    var day = selKey();
+    var locked = kidLocked(c.id);
+    var ck = checksOf(day, c.id);
     var list = document.getElementById('taskList');
-    if(!ts.length){
-      list.innerHTML = '<div class="empty">아직 오늘의 계획이 없어요.<br>부모 모드 ⚙️에서 항목을 추가해 주세요.</div>';
+    var secTitle = document.getElementById('taskSecTitle');
+    if(secTitle) secTitle.textContent = '📋 ' + (ui.dayOffset === 0 ? '오늘의 계획' : DAY_LABELS[-ui.dayOffset] + '의 계획');
+
+    if(locked){
+      list.innerHTML = kidGateHTML(c);
+      document.getElementById('todayCount').textContent = '🔒';
+      document.getElementById('allDoneSlot').innerHTML = '';
+      document.getElementById('dayNoteSlot').innerHTML = '';
+      document.getElementById('todayShop').innerHTML = '<div class="empty" style="grid-column:1/-1">🔒 ' + esc(c.name) + '의 페이지는 잠겨 있어요.<br>이 아이의 비밀번호를 넣으면 보상을 고를 수 있어요.</div>';
+      document.getElementById('canBuyNote').textContent = '';
     } else {
-      list.innerHTML = ts.map(function(t){
-        var on = !!ck[t.id];
-        var meta = [t.time, t.note].filter(Boolean).join(' · ');
-        return '<button class="task' + (on?' done':'') + '" data-act="toggle" data-id="' + t.id + '" aria-pressed="' + on + '">' +
-          '<span class="ck">' + (on ? '✓' : '') + '</span>' +
-          '<span class="tmain">' +
-            '<span class="ttitle">' + esc(t.title) + '</span>' +
-            (meta ? '<span class="tmeta">' + esc(meta) + '</span>' : '') +
-          '</span>' +
-          '<span class="tpts">' + (on ? '완료 +' : '+') + t.points + 'P</span>' +
-        '</button>';
-      }).join('');
+      if(!ts.length){
+        list.innerHTML = '<div class="empty">아직 ' + (ui.dayOffset === 0 ? '오늘' : DAY_LABELS[-ui.dayOffset]) + '의 계획이 없어요.<br>부모 모드 ⚙️에서 항목을 추가해 주세요.</div>';
+      } else {
+        list.innerHTML = ts.map(function(t){
+          var on = !!ck[t.id];
+          var entry = ck[t.id];
+          var ph = entry && entry.photo;
+          var meta = [t.time, t.note].filter(Boolean).join(' · ');
+          var photoBtn = ph
+            ? '<button class="tphotobtn" data-act="view-photo" data-kid="' + c.id + '" data-day="' + day + '" data-id="' + t.id + '" aria-label="' + esc(t.title) + ' 인증 사진 크게 보기"><img src="' + esc(ph.src) + '" alt="인증 사진"></button>'
+            : '<button class="tphotobtn" data-act="photo" data-id="' + t.id + '" aria-label="' + esc(t.title) + ' 사진 인증 올리기">📷</button>';
+          return '<div class="task' + (on?' done':'') + '">' +
+            '<button class="tmainbtn" data-act="toggle" data-id="' + t.id + '" aria-pressed="' + on + '">' +
+              '<span class="ck">' + (on ? '✓' : '') + '</span>' +
+              '<span class="tmain">' +
+                '<span class="ttitle">' + esc(t.title) + (t.needPhoto ? '<span class="ttag">📷 인증</span>' : '') + '</span>' +
+                (meta ? '<span class="tmeta">' + esc(meta) + '</span>' : '') +
+              '</span>' +
+              '<span class="tpts">' + (on ? '완료 +' : '+') + t.points + 'P</span>' +
+            '</button>' + photoBtn +
+          '</div>';
+        }).join('');
+      }
+
+      var doneN = doneCount(day, c.id);
+      var left = ts.length - doneN;
+      document.getElementById('todayCount').textContent = doneN + '/' + ts.length + ' 완료';
+      document.getElementById('allDoneSlot').innerHTML =
+        (ts.length && doneN === ts.length) ? '<div class="alldone">🎉 ' + (ui.dayOffset === 0 ? '오늘' : DAY_LABELS[-ui.dayOffset]) + ' 계획을 모두 마쳤어요! ' + esc(c.name) + ' 최고!</div>' : '';
+
+      var note = '';
+      if(ui.dayOffset < 0){
+        note = '<div class="daynote">' + fmtDate(day) + ' · ' + DAY_LABELS[-ui.dayOffset] + ' 계획이에요. ' +
+          (left > 0 ? '못 끝낸 ' + left + '개를 지금 체크하면 ' + DAY_LABELS[-ui.dayOffset] + ' 기록으로 적립돼요.' : '모든 항목을 마쳤어요!') +
+          ' (같은 항목은 한 번만 적립돼요)</div>';
+      }
+      document.getElementById('dayNoteSlot').innerHTML = note;
+
+      var p = pointsOf(c.id);
+      var cheapOnes = state.rewards.filter(function(r){ return r.cost<=p; });
+      document.getElementById('canBuyNote').textContent = cheapOnes.length ? (cheapOnes.length + '개 교환 가능') : ('다음 목표 ' + (state.rewards.length ? Math.min.apply(null, state.rewards.map(function(r){return r.cost;})) + 'P' : '-'));
+      document.getElementById('todayShop').innerHTML = rewardCards(state.rewards.slice(0,4), p, c);
     }
-    var done = doneCount(currentDay, c.id);
-    document.getElementById('todayCount').textContent = done + '/' + ts.length + ' 완료';
-    document.getElementById('allDoneSlot').innerHTML =
-      (ts.length && done === ts.length) ? '<div class="alldone">🎉 오늘 계획을 모두 마쳤어요! ' + esc(c.name) + ' 최고!</div>' : '';
 
     var w = weekStats(c.id);
     document.getElementById('statStreak').textContent = streakOf(c.id) + '일';
     document.getElementById('statWeek').textContent = w.earn + 'P';
     document.getElementById('statDone').textContent = w.done + '개';
-
-    // 오늘 화면의 보상 미리보기
-    var p = pointsOf(c.id);
-    var cheapOnes = state.rewards.filter(function(r){ return r.cost<=p; });
-    document.getElementById('canBuyNote').textContent = cheapOnes.length ? (cheapOnes.length + '개 교환 가능') : ('다음 목표 ' + (state.rewards.length ? Math.min.apply(null, state.rewards.map(function(r){return r.cost;})) + 'P' : '-'));
-    document.getElementById('todayShop').innerHTML = rewardCards(state.rewards.slice(0,4), p, c);
   }
 
   function rewardCards(list, p, c){
@@ -1503,6 +1839,400 @@
     toast('진행도 요약 리포트를 내려받았어요');
   }
 
+  /* ═══════════ 📷 사진 인증 ═══════════ */
+  var PHOTO_MAX = 900, PHOTO_Q = 0.75;
+  function photoSheet(taskId, dayKey){
+    var t = findTask(taskId);
+    if(!t) return;
+    var c = kid(t.childId);
+    if(kidLocked(c.id)){ toast('먼저 ' + c.name + '의 비밀번호를 넣어 주세요'); return; }
+    var day = dayKey || selKey();
+    var entry = checksOf(day, c.id)[taskId];
+    ui.pendingPhoto = {taskId: taskId, dayKey: day};
+    openSheet(
+      '<h3>📷 사진 인증</h3>' +
+      '<div class="sub">' + esc(c.emoji) + ' ' + esc(c.name) + ' · ' + esc(t.title) + '<br>' +
+        fmtDate(day) + (ui.dayOffset < 0 ? ' (' + DAY_LABELS[-ui.dayOffset] + ')' : '') + ' 항목이에요. 문제집을 푼 사진을 찍거나 앨범에서 골라 주세요.' +
+        '<br>사진은 기기에서 최대 ' + PHOTO_MAX + 'px로 줄여 저장해요.</div>' +
+      '<div class="photobtns">' +
+        '<button class="btn-primary" data-act="photo-cam">📷 사진 찍기</button>' +
+        '<button class="btn-ghost" data-act="photo-album">🖼 앨범에서 고르기</button>' +
+      '</div>' +
+      '<div class="hint" style="margin-top:10px;text-align:center">' +
+        (entry ? '이미 완료한 항목이에요. 사진을 올리면 새 사진으로 바꿔요.' : '사진을 올리면 이 항목이 완료되고 ' + t.points + 'P가 적립돼요.') +
+      '</div>' +
+      '<div class="sheet-actions" style="margin-top:12px"><button class="btn-ghost" data-act="close-modal">닫기</button></div>'
+    );
+  }
+
+  function openPhotoView(kidId, dayKey, taskId){
+    var t = findTask(taskId);
+    var c = kid(kidId);
+    var e = checksOf(dayKey, kidId)[taskId];
+    var ph = e && e.photo;
+    if(!ph){ photoSheet(taskId, dayKey); return; }
+    openSheet(
+      '<h3>📷 인증 사진</h3>' +
+      '<div class="photometa"><span>' + esc(c.emoji) + ' ' + esc(c.name) + ' · ' + esc(t ? t.title : '인증 사진') + '</span>' +
+        '<span>' + fmtDate(dayKey) + ' ' + fmtTime(ph.ts) + '</span></div>' +
+      '<div class="photo-big"><img src="' + esc(ph.src) + '" alt="' + esc(t ? t.title : '') + ' 인증 사진"></div>' +
+      '<div class="hint" style="text-align:center;margin-bottom:10px">' + (ph.mode === 'cloud' ? '☁️ 클라우드에 저장된 사진' : '이 기기에 저장된 사진') + '</div>' +
+      '<div class="sheet-actions">' +
+        '<button class="btn-ghost" data-act="close-modal">닫기</button>' +
+        '<button class="btn-ghost" style="color:#dc2626" data-act="uncheck" data-kid="' + esc(kidId) + '" data-id="' + esc(taskId) + '" data-day="' + esc(dayKey) + '">체크 취소</button>' +
+      '</div>'
+    );
+  }
+
+  function compressImage(file, cb){
+    if(!file){ cb(null); return; }
+    if(!/^image\//.test(file.type || '')){ toast('이미지 파일만 올릴 수 있어요'); cb(null); return; }
+    var objUrl = URL.createObjectURL(file);
+    var img = new Image();
+    img.onload = function(){
+      try{
+        var w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+        if(!w || !h) throw new Error('empty image');
+        var scale = Math.min(1, PHOTO_MAX / Math.max(w, h));
+        var cw = Math.max(1, Math.round(w * scale)), ch = Math.max(1, Math.round(h * scale));
+        var cv = document.createElement('canvas');
+        cv.width = cw; cv.height = ch;
+        var ctx = cv.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, cw, ch);
+        ctx.drawImage(img, 0, 0, cw, ch);
+        var data = cv.toDataURL('image/jpeg', PHOTO_Q);
+        URL.revokeObjectURL(objUrl);
+        cb(data, {w: cw, h: ch});
+      }catch(e){
+        URL.revokeObjectURL(objUrl);
+        cb(null);
+      }
+    };
+    img.onerror = function(){ URL.revokeObjectURL(objUrl); cb(null); };
+    img.src = objUrl;
+  }
+
+  function handlePhotoFile(file){
+    var pend = ui.pendingPhoto;
+    if(!pend){ toast('먼저 항목의 📷 버튼을 눌러 주세요'); return; }
+    toast('사진을 준비하고 있어요…');
+    compressImage(file, function(data, dim){
+      if(!data){ toast('사진을 읽지 못했어요 · 다른 사진으로 해 보세요'); return; }
+      attachPhoto(pend.taskId, pend.dayKey, data, dim);
+    });
+  }
+
+  function attachPhoto(taskId, dayKey, dataUrl, dim){
+    var t = findTask(taskId);
+    if(!t) return;
+    var cid = t.childId;
+    if(kidLocked(cid)){ closeModal(); toast('먼저 비밀번호를 넣어 주세요'); return; }
+    var day = dayKey || selKey();
+    var bucket = ensureBucket(day, cid);
+    var entry = bucket[taskId];
+    var earned = false;
+    if(!entry){
+      var e = addEntry(cid, t.points, 'earn', t.title, {taskId: t.id}, day);   /* 중복 적립 없이 한 번만 */
+      entry = {ts: Date.now(), ledgerId: e.id};
+      bucket[taskId] = entry;
+      earned = true;
+    }
+    entry.photo = {src: dataUrl, ts: Date.now(), w: (dim && dim.w) || 0, h: (dim && dim.h) || 0, mode: 'local'};
+    refreshSnapshot(day, cid);
+    state.updatedAt = Date.now();
+    save(); closeModal(); render();
+    chime(true); vibrate(18); confetti(earned ? 16 : 8);
+    toast(earned ? '📷 사진 인증 완료! +' + t.points + 'P' : '📷 사진을 첨부했어요');
+    if(cloudReady() && cloudCfg().verified && !cloudCfg().needsSetup){
+      var path = cid + '/' + day + '/' + taskId + '-' + Date.now() + '.jpg';
+      cloudUploadPhoto(dataUrl, path).then(function(url){
+        if(!url) return;
+        var b2 = (state.checks[day] && state.checks[day][cid]) || {};
+        var en = b2[taskId];
+        if(en && en.photo && en.photo.src === dataUrl){
+          en.photo.src = url;
+          en.photo.mode = 'cloud';
+          en.photo.path = path;
+          save();
+          if(ui.view === 'today' || ui.view === 'parent') render();
+        }
+      });
+    }
+  }
+
+  function dataUrlToBlob(dataUrl){
+    try{
+      var parts = String(dataUrl).split(',');
+      var mime = (/data:([^;]+);/.exec(parts[0]) || [])[1] || 'image/jpeg';
+      var bin = atob(parts[1] || '');
+      var arr = new Uint8Array(bin.length);
+      for(var i=0;i<bin.length;i++) arr[i] = bin.charCodeAt(i);
+      return new Blob([arr], {type: mime});
+    }catch(e){ return null; }
+  }
+
+  /* ═══════════ 🔐 아이별 비밀번호 ═══════════ */
+  function renderKidDots(){
+    var dots = document.querySelectorAll('#kpinDots .dot');
+    for(var i=0;i<dots.length;i++){ dots[i].className = 'dot' + (i < ui.kpinBuffer.length ? ' on' : ''); }
+  }
+  function kidPinKey(k){
+    if(ui.kpinBuffer.length >= 4) return;
+    ui.kpinBuffer += k;
+    ui.kpinError = '';
+    renderKidDots();
+    var err = document.getElementById('kpinErr');
+    if(err) err.textContent = '';
+    if(ui.kpinBuffer.length === 4) setTimeout(checkKidPin, 120);
+  }
+  function checkKidPin(){
+    var c = kid(ui.kidId);
+    var kp = kidPinCfg(c.id);
+    if(ui.kpinBuffer === kp.pin){
+      ui.kidUnlocked[c.id] = true;
+      ui.kpinBuffer = '';
+      ui.kpinError = '';
+      chime(true);
+      render();
+      toast(c.name + ' 페이지를 열었어요');
+    } else {
+      ui.kpinError = '비밀번호가 맞지 않아요. 다시 입력해 주세요.';
+      ui.kpinBuffer = '';
+      var dots = document.getElementById('kpinDots');
+      if(dots){ dots.classList.add('shake'); setTimeout(function(){ dots.classList.remove('shake'); }, 400); }
+      var err = document.getElementById('kpinErr');
+      if(err) err.textContent = ui.kpinError;
+      renderKidDots();
+      vibrate([20,60,20]);
+    }
+  }
+
+  /* ═══════════ ☁️ 클라우드 동기화 (Supabase REST · Storage) ═══════════ */
+  function cloudCfg(){
+    if(!state.settings) state.settings = {};
+    if(!state.settings.cloud || typeof state.settings.cloud !== 'object') state.settings.cloud = {};
+    var c = state.settings.cloud;
+    if(typeof c.url !== 'string') c.url = '';
+    if(typeof c.key !== 'string') c.key = '';
+    if(typeof c.lastSync !== 'number') c.lastSync = 0;
+    if(typeof c.lastPulledAt !== 'number') c.lastPulledAt = 0;
+    if(typeof c.lastError !== 'string') c.lastError = '';
+    if(typeof c.enabled !== 'boolean') c.enabled = true;
+    return c;
+  }
+  function cloudKey(){ return String(cloudCfg().key || DEFAULT_CLOUD_KEY || '').trim(); }
+  function cloudBase(){ return String(cloudCfg().url || DEFAULT_CLOUD_URL || '').trim().replace(/\/+$/, ''); }
+  function cloudReady(){
+    return !!(cloudCfg().enabled !== false && cloudKey() && /^https?:\/\//.test(cloudBase()));
+  }
+  function cloudHdrs(extra){
+    var key = cloudKey();
+    /* publishable/anon 키는 apikey 와 Authorization 둘 다에 넣으면 REST·Storage 모두 통한다 */
+    var h = { apikey: key, Authorization: 'Bearer ' + key };
+    if(extra) for(var k in extra){ if(Object.prototype.hasOwnProperty.call(extra,k)) h[k] = extra[k]; }
+    return h;
+  }
+  function cloudTable(){ return cloudCfg().table || 'family_state'; }
+  function cloudRow(){ return cloudCfg().row || 'family'; }
+  function cloudBucket(){ return cloudCfg().bucket || 'proof-photos'; }
+  function cloudStatusText(){
+    var c = cloudCfg();
+    if(!cloudReady()) return '이 기기 저장(로컬) 모드 · 클라우드 연결이 꺼져 있어요';
+    if(ui.cloudBusy) return '동기화하는 중…';
+    if(c.needsSetup) return '☁️ 주소·키 연결됨 · 준비가 하나 남았어요 — 아래 SQL을 한 번 실행한 뒤 ‘지금 동기화’를 눌러 주세요';
+    if(c.lastError) return '연결을 확인해 주세요 · ' + c.lastError;
+    if(!c.verified) return '☁️ 주소·키 준비됨 · ‘지금 동기화’를 한 번 누르면 자동 동기화가 시작돼요';
+    if(c.lastSync) return '☁️ 연결됨 · 마지막 동기화 ' + fmtDate(dateKey(new Date(c.lastSync))) + ' ' + fmtTime(c.lastSync);
+    return '☁️ 연결됨 · 아직 동기화 전이에요';
+  }
+  function markCloudError(e){
+    var msg = (e && e.message) ? e.message : '연결 실패';
+    var c = cloudCfg();
+    if(/HTTP 404|PGRST205|42P01|Bucket not found|NoSuchBucket/i.test(msg)){
+      c.lastError = '';
+      c.needsSetup = true;
+    } else {
+      c.needsSetup = false;
+      c.lastError = msg;
+    }
+    if(ui.view === 'parent') renderParentPanel();
+  }
+  function cloudPull(silent){
+    if(!cloudReady()) return Promise.resolve(false);
+    var url = cloudBase() + '/rest/v1/' + cloudTable() +
+      '?id=eq.' + encodeURIComponent(cloudRow()) + '&select=state,updated_at';
+    return fetch(url, {headers: cloudHdrs({Accept: 'application/json'}), cache: 'no-store'})
+      .then(function(r){ if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function(rows){
+        var c0 = cloudCfg();
+        c0.needsSetup = false;          /* 테이블이 읽혔다는 건 준비가 끝났다는 뜻 */
+        c0.lastError = '';
+        c0.verified = true;
+        var row = rows && rows[0];
+        if(!row || !row.state) return false;
+        var at = Date.parse(row.updated_at || '') || Number(row.state.updatedAt) || 0;
+        var seen = Number(cloudCfg().lastPulledAt) || 0;
+        if(at && at <= seen) return false;            /* 이미 받은 버전이면 그대로 */
+        var keep = cloudCfg();
+        var next = normalize(row.state);
+        next.settings.cloud = keep;                   /* 이 기기의 연결 설정은 유지 */
+        state = next;
+        if(!state.children.some(function(c){ return c.id === ui.kidId; })) ui.kidId = state.children[0].id;
+        ui.manageKid = ui.kidId;
+        ui.kidUnlocked[ui.kidId] = true;
+        keep.lastPulledAt = at || Date.now();
+        keep.lastSync = Date.now();
+        keep.lastError = '';
+        keep.needsSetup = false;
+        keep.verified = true;
+        save(true);
+        render();
+        if(!silent) toast('☁️ 클라우드에서 최신 기록을 받았어요');
+        return true;
+      })
+      .catch(function(e){ markCloudError(e); return false; });
+  }
+  function cloudPush(silent){
+    if(!cloudReady()) return Promise.resolve(false);
+    state.updatedAt = Date.now();
+    var body = [{ id: cloudRow(), state: state, updated_at: new Date().toISOString() }];
+    var url = cloudBase() + '/rest/v1/' + cloudTable() + '?on_conflict=id&select=id,updated_at';
+    return fetch(url, {
+      method: 'POST',
+      headers: cloudHdrs({'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=representation'}),
+      body: JSON.stringify(body)
+    }).then(function(r){
+      if(!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json().catch(function(){ return null; });
+    }).then(function(rows){
+      var at = (rows && rows[0] && Date.parse(rows[0].updated_at || '')) || Date.now();
+      cloudCfg().lastPulledAt = at;
+      cloudCfg().lastSync = Date.now();
+      cloudCfg().lastError = '';
+      cloudCfg().needsSetup = false;
+      cloudCfg().verified = true;
+      save(true);
+      if(ui.view === 'parent') renderParentPanel();
+      if(!silent) toast('☁️ 클라우드에 저장했어요');
+      return true;
+    }).catch(function(e){
+      markCloudError(e);
+      if(!silent) toast('동기화하지 못했어요 · 이 기기에는 저장됨');
+      return false;
+    });
+  }
+  function cloudUploadPhoto(dataUrl, path){
+    if(!cloudReady()) return Promise.resolve(null);
+    var blob = dataUrlToBlob(dataUrl);
+    if(!blob) return Promise.resolve(null);
+    var safePath = String(path).split('/').map(encodeURIComponent).join('/');
+    var url = cloudBase() + '/storage/v1/object/' + cloudBucket() + '/' + safePath;
+    var pub = cloudBase() + '/storage/v1/object/public/' + cloudBucket() + '/' + safePath;
+    return fetch(url, {
+      method: 'POST',
+      headers: cloudHdrs({'Content-Type': 'image/jpeg', 'x-upsert': 'true'}),
+      body: blob
+    }).then(function(r){
+      if(!r.ok) throw new Error('사진 HTTP ' + r.status);
+      return pub;
+    }).catch(function(e){ markCloudError(e); return null; });
+  }
+  function cloudSync(){
+    closeModal();
+    if(!cloudReady()){ toast('지금은 이 기기 저장(로컬) 모드예요 · anon 키를 넣으면 연결돼요'); return; }
+    ui.cloudBusy = true;
+    if(ui.view === 'parent') renderParentPanel();
+    cloudPull(true).then(function(){
+      if(cloudCfg().needsSetup) return false;
+      return cloudPush(false);
+    }).then(function(ok){
+      ui.cloudBusy = false;
+      if(ui.view === 'parent') renderParentPanel();
+      render();
+      if(cloudCfg().needsSetup){
+        toast('☁️ 아래 SQL을 Supabase SQL Editor에서 한 번 실행해 주세요', 'big');
+      } else if(ok === false && cloudCfg().lastError){
+        toast('동기화하지 못했어요 · 이 기기에는 저장됨');
+      }
+    });
+  }
+  function saveCloudConfig(){
+    var urlEl = document.getElementById('cloudUrl'), keyEl = document.getElementById('cloudKey'), rowEl = document.getElementById('cloudRow');
+    var url = ((urlEl && urlEl.value) || '').trim().replace(/\/+$/, '');
+    var key = ((keyEl && keyEl.value) || '').trim();
+    var row = ((rowEl && rowEl.value) || 'family').trim().replace(/[^A-Za-z0-9_-]/g, '') || 'family';
+    if(url && !/^https?:\/\//.test(url)){ toast('주소는 https:// 로 시작해야 해요'); return; }
+    var c = cloudCfg();
+    if(c.row !== row || c.url !== url || c.key !== key){ c.lastPulledAt = 0; c.verified = false; }
+    c.url = url;
+    c.key = key;
+    c.row = row;
+    c.enabled = true;
+    c.lastError = '';
+    c.needsSetup = false;
+    save();
+    renderParentPanel();
+    toast(cloudReady() ? '☁️ 클라우드 연결을 저장했어요' : '저장했어요 · anon 키를 넣으면 클라우드에 연결돼요');
+  }
+  function cloudOff(){
+    var c = cloudCfg();
+    c.enabled = false;
+    c.url = ''; c.key = ''; c.lastPulledAt = 0; c.lastError = ''; c.needsSetup = false; c.verified = false;
+    save(true);
+    renderParentPanel();
+    toast('클라우드 연결을 해제했어요 · 이 기기에만 저장해요');
+  }
+
+  /* ═══════════ 👨‍👩‍👧‍👦 부모: 삼 남매 한눈에 ═══════════ */
+  function dashHTML(){
+    var rows = state.children.map(function(c){
+      var days = '';
+      for(var off=0; off>=-2; off--){
+        var k = dateKey(addDays(new Date(), off));
+        var r = recordOf(k, c.id);
+        var ts = tasksFor(c.id);
+        var pct = r ? r.pct : 0;
+        var done = r ? r.done : 0;
+        var total = ts.length;
+        days += '<div class="dk-day' + (pct >= 100 ? ' full' : '') + '">' +
+          '<span>' + DAY_LABELS[-off] + '</span>' +
+          '<b>' + pct + '%</b>' +
+          '<div class="dkbar"><i style="width:' + pct + '%"></i></div>' +
+          '<span>' + done + '/' + total + '</span></div>';
+      }
+      var photos = photosFor(c.id, 7).length;
+      return '<div class="dashkid">' +
+        '<div class="dk-head">' +
+          '<span class="dk-emoji">' + esc(c.emoji) + '</span>' +
+          '<span class="dk-name">' + esc(c.name) + '</span>' +
+          '<span class="dk-grade">' + esc(c.grade) + '</span>' +
+          '<span class="dk-pts">' + pointsOf(c.id) + 'P</span>' +
+        '</div>' +
+        '<div class="dk-days">' + days + '</div>' +
+        '<div class="dk-foot"><span class="pin-meta">📷 7일 인증 ' + photos + '장 · 연속 ' + streakOf(c.id) + '일</span>' +
+          '<button class="mini" data-act="goto-kid" data-id="' + c.id + '">페이지 보기</button></div>' +
+      '</div>';
+    }).join('');
+    var ph = recentPhotos(8);
+    var phHtml = ph.length
+      ? '<div class="recphotos">' + ph.map(function(p){
+          return '<button class="recphoto" data-act="view-photo" data-kid="' + p.kidId + '" data-day="' + p.dayKey + '" data-id="' + p.taskId + '" aria-label="' + esc(p.title) + ' 사진 크게 보기">' +
+            '<img src="' + esc(p.photo.src) + '" alt="' + esc(p.title) + ' 인증 사진">' +
+            '<span class="rpname">' + esc(kid(p.kidId).name) + ' · ' + fmtTime(p.photo.ts) + '</span></button>';
+        }).join('') + '</div>'
+      : '<div class="hint">아직 올라온 인증 사진이 없어요. 아이가 항목 옆 📷 버튼으로 사진을 올리면 여기 모여요.</div>';
+    return '<div class="card pcard">' +
+      '<div class="sec-head" style="padding:0;margin-bottom:9px"><div class="sec-title">👨‍👩‍👧‍👦 삼 남매 한눈에 보기</div>' +
+        '<span class="sec-note">오늘 · 어제 · 그저께</span></div>' +
+      '<div class="dash">' + rows + '</div>' +
+    '</div>' +
+    '<div class="card pcard" style="margin-top:4px">' +
+      '<div class="sec-head" style="padding:0;margin-bottom:8px"><div class="sec-title">📷 최근 인증 사진</div>' +
+        '<span class="sec-note">' + ph.length + '장</span></div>' + phHtml +
+    '</div>';
+  }
+
   /* ═══════════ 부모 모드 ═══════════ */
   function renderParent(){
     var gate = document.getElementById('parentGate');
@@ -1548,7 +2278,7 @@
       return '<div class="prow">' +
         '<div style="flex:1;min-width:0">' +
           '<div class="pin-name">' + esc(t.title) + '</div>' +
-          '<div class="pin-meta">' + esc([t.time, t.note, '+' + t.points + 'P'].filter(Boolean).join(' · ')) + '</div>' +
+          '<div class="pin-meta">' + esc([t.time, t.note, '+' + t.points + 'P', t.needPhoto ? '📷 사진 인증 필요' : ''].filter(Boolean).join(' · ')) + '</div>' +
         '</div>' +
         '<button class="mini" data-act="edit-task" data-id="' + t.id + '">수정</button>' +
         '<button class="mini warn" data-act="del-task" data-id="' + t.id + '">삭제</button>' +
@@ -1578,7 +2308,8 @@
     }).join('');
 
     panel.innerHTML =
-      '<div class="section" style="margin-top:14px"><div class="card pcard">' +
+      '<div class="section" style="margin-top:14px">' + dashHTML() + '</div>' +
+      '<div class="section"><div class="card pcard">' +
         '<div class="sec-head" style="padding:0;margin-bottom:8px"><div class="sec-title">📋 오늘의 계획 관리</div>' +
           '<button class="mini" data-act="lock-parent">잠금</button></div>' +
         '<div class="chipline">' + state.children.map(function(c){
@@ -1619,6 +2350,39 @@
           '</div>' +
         '</div>' +
         '<button class="btn-ghost" data-act="save-pin">PIN 바꾸기</button>' +
+      '</div>' +
+
+      '<div class="card pcard">' +
+        '<div class="sec-head" style="padding:0;margin-bottom:8px"><div class="sec-title">🔐 아이별 비밀번호</div></div>' +
+        '<div class="hint" style="margin-bottom:10px">다른 아이 탭으로 바꿀 때 이 비밀번호를 물어봐요. 잠금을 끄면 비밀번호 없이 들어갈 수 있어요. <b>부모 모드 PIN(위)</b>은 모든 아이 페이지를 열 수 있는 마스터 번호예요.</div>' +
+        state.children.map(function(c){
+          var kp = kidPinCfg(c.id);
+          return '<div class="prow" style="flex-wrap:wrap;gap:6px">' +
+            '<div style="flex:1;min-width:92px"><div class="pin-name">' + esc(c.emoji) + ' ' + esc(c.name) + '</div>' +
+            '<div class="pin-meta">' + (kp.lock ? '🔒 잠금 사용 중' : '🔓 잠금 꺼짐') + '</div></div>' +
+            '<input class="kinp" id="kp-' + c.id + '" type="text" inputmode="numeric" maxlength="4" pattern="[0-9]*" value="' + esc(kp.pin) + '" aria-label="' + esc(c.name) + ' 비밀번호">' +
+            '<button class="mini" data-act="save-kid-pin" data-id="' + c.id + '">저장</button>' +
+            '<button class="mini' + (kp.lock ? ' warn' : '') + '" data-act="toggle-kid-lock" data-id="' + c.id + '">' + (kp.lock ? '잠금 끄기' : '잠금 켜기') + '</button>' +
+          '</div>';
+        }).join('') +
+      '</div>' +
+
+      '<div class="card pcard">' +
+        '<div class="sec-head" style="padding:0;margin-bottom:8px"><div class="sec-title">☁️ 클라우드 동기화</div></div>' +
+        '<div class="cloudstat ' + (cloudReady() && !cloudCfg().lastError ? 'on' : 'off') + '"><span class="dotc"></span><span>' + esc(cloudStatusText()) + '</span></div>' +
+        '<label class="field"><span>Supabase Project URL</span><input id="cloudUrl" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://xxxx.supabase.co" value="' + esc(cloudCfg().url || DEFAULT_CLOUD_URL) + '"></label>' +
+        '<label class="field"><span>anon · publishable 키 (Project Settings → API)</span><input id="cloudKey" type="text" autocomplete="off" spellcheck="false" placeholder="sb_publishable_…" value="' + esc(cloudCfg().key || DEFAULT_CLOUD_KEY) + '"></label>' +
+        '<label class="field"><span>가족 코드 (4대 모두 같은 값으로)</span><input id="cloudRow" type="text" maxlength="24" autocomplete="off" spellcheck="false" placeholder="family" value="' + esc(cloudCfg().row || 'family') + '"></label>' +
+        '<div class="fieldrow">' +
+          '<button class="btn-primary" data-act="save-cloud">연결 저장</button>' +
+          '<button class="btn-ghost" data-act="sync-now"' + (cloudReady() ? '' : ' disabled') + '>지금 동기화</button>' +
+        '</div>' +
+        (cloudReady() ? '<div style="height:8px"></div><button class="btn-ghost" data-act="cloud-off">연결 해제</button>' : '') +
+        '<details style="margin-top:10px"><summary style="font-size:12px;font-weight:800;color:var(--ink-2);cursor:pointer">처음 한 번만: Supabase 준비하기 (SQL)</summary>' +
+          '<div class="hint" style="margin:8px 0 0;line-height:1.6">Supabase → SQL Editor에 아래를 붙여 실행하고, Storage에 <b>proof-photos</b> 버킷(Public)을 만들면 끝이에요. 이미 있는 항목은 건너뛰세요.</div>' +
+          '<div class="sqldoc">' + esc(CLOUD_SQL) + '</div>' +
+          '<div class="hint" style="margin-top:6px">프로젝트 주소를 아는 사람은 누구나 볼 수 있는 설정이에요. 주소·키는 가족끼리만 나누세요.</div>' +
+        '</details>' +
       '</div>' +
 
       '<div class="card pcard">' +
@@ -1731,6 +2495,10 @@
         '<label class="field"><span>포인트</span><input id="f-points" type="number" inputmode="numeric" min="0" max="999" value="' + task.points + '"></label>' +
       '</div>' +
       '<label class="field"><span>메모 (선택)</span><input id="f-note" type="text" maxlength="40" placeholder="예: 알림장 확인하고 하기" value="' + esc(task.note) + '"></label>' +
+      '<label class="field" style="display:flex;align-items:center;gap:9px;background:#fbfcfe;border:1.5px solid #e6e9f0;border-radius:13px;padding:11px 12px">' +
+        '<input id="f-needphoto" type="checkbox" style="width:20px;height:20px;min-height:20px;flex:none;padding:0"' + (task.needPhoto ? ' checked' : '') + '>' +
+        '<span style="margin:0;font-size:13px;font-weight:700;color:var(--ink-2)">📷 사진 인증 필요 <span style="font-weight:600;color:var(--ink-3)">(사진을 올려야 완료)</span></span>' +
+      '</label>' +
       '<div class="sheet-actions">' +
         '<button class="btn-ghost" data-act="close-modal">취소</button>' +
         '<button class="btn-primary" data-act="save-task" data-id="' + (isNew ? '' : task.id) + '">' + (isNew ? '추가하기' : '저장') + '</button>' +
@@ -1745,13 +2513,14 @@
     var childId = document.getElementById('f-child').value;
     var time = document.getElementById('f-time').value || '';
     var note = (document.getElementById('f-note').value || '').trim();
+    var needPhoto = !!(document.getElementById('f-needphoto') && document.getElementById('f-needphoto').checked);
     if(id){
       state.tasks.forEach(function(t){
-        if(t.id===id){ t.title=title; t.points=points; t.childId=childId; t.time=time; t.note=note; }
+        if(t.id===id){ t.title=title; t.points=points; t.childId=childId; t.time=time; t.note=note; t.needPhoto=needPhoto; }
       });
       toast('계획을 수정했어요');
     } else {
-      state.tasks.push({id:uid(), childId:childId, title:title, time:time, note:note, points:points, order:state.tasks.length});
+      state.tasks.push({id:uid(), childId:childId, title:title, time:time, note:note, points:points, order:state.tasks.length, needPhoto:needPhoto});
       toast('계획을 추가했어요');
     }
     ui.manageKid = childId;
@@ -1921,9 +2690,90 @@
         exportProgressReport();
         break;
       case 'pick-kid':
+        if(ui.kidId !== id){
+          ui.kpinBuffer = '';
+          ui.kpinError = '';
+        }
         ui.kidId = id;
         ui.manageKid = id;
+        if(!kidLocked(id)) ui.kidUnlocked[id] = true;
         render();
+        break;
+      case 'pick-day':
+        ui.dayOffset = clamp(parseInt(el.getAttribute('data-off'),10) || 0, -2, 0);
+        ui.kpinBuffer = '';
+        ui.kpinError = '';
+        render();
+        break;
+      case 'kpin':
+        kidPinKey(el.getAttribute('data-k'));
+        break;
+      case 'kpin-del':
+        ui.kpinBuffer = ui.kpinBuffer.slice(0,-1);
+        renderKidDots();
+        break;
+      case 'kpin-clear':
+        ui.kpinBuffer = '';
+        renderKidDots();
+        break;
+      case 'lock-kid':
+        delete ui.kidUnlocked[ui.kidId];
+        ui.kpinBuffer = '';
+        ui.kpinError = '';
+        render();
+        toast(kid(ui.kidId).name + ' 페이지를 잠갔어요');
+        break;
+      case 'goto-kid':
+        ui.kidId = id;
+        ui.manageKid = id;
+        ui.view = 'today';
+        if(!kidLocked(id)) ui.kidUnlocked[id] = true;
+        render();
+        window.scrollTo({top:0, behavior:'smooth'});
+        break;
+      case 'photo':
+        photoSheet(id, selKey());
+        break;
+      case 'view-photo':
+        openPhotoView(el.getAttribute('data-kid'), el.getAttribute('data-day'), id);
+        break;
+      case 'photo-cam':
+      case 'photo-album':
+        var input = document.getElementById(act === 'photo-cam' ? 'photoCam' : 'photoAlbum');
+        if(input && ui.pendingPhoto) input.click();
+        break;
+      case 'uncheck':
+        uncheckTask(el.getAttribute('data-day') || selKey(), el.getAttribute('data-kid') || kid(ui.kidId).id, id);
+        closeModal();
+        break;
+      case 'save-kid-pin':
+        var pinEl = document.getElementById('kp-' + id);
+        var npv = pinEl ? (pinEl.value || '').trim() : '';
+        if(!/^\d{4}$/.test(npv)){ toast('숫자 4자리로 정해 주세요'); return; }
+        if(!state.settings.kidPins[id]) state.settings.kidPins[id] = {pin:'1111', lock:true};
+        state.settings.kidPins[id].pin = npv;
+        state.settings.kidPins[id].lock = true;
+        delete ui.kidUnlocked[id];
+        ui.kpinBuffer = '';
+        save(); render();
+        toast(kid(id).name + ' 비밀번호를 바꿨어요 (잠금 켜짐)');
+        break;
+      case 'toggle-kid-lock':
+        if(!state.settings.kidPins[id]) state.settings.kidPins[id] = {pin:'1111', lock:true};
+        state.settings.kidPins[id].lock = !state.settings.kidPins[id].lock;
+        if(state.settings.kidPins[id].lock) delete ui.kidUnlocked[id];
+        else ui.kidUnlocked[id] = true;
+        save(); render();
+        toast(kid(id).name + ' 잠금을 ' + (state.settings.kidPins[id].lock ? '켰어요' : '껐어요'));
+        break;
+      case 'save-cloud':
+        saveCloudConfig();
+        break;
+      case 'sync-now':
+        cloudSync();
+        break;
+      case 'cloud-off':
+        cloudOff();
         break;
       case 'manage-kid':
         ui.manageKid = id;
@@ -2055,6 +2905,9 @@
             ui.kidId = state.children[0].id;
             ui.manageKid = state.children[0].id;
             ui.parentUnlocked = false;
+            ui.dayOffset = 0;
+            ui.kidUnlocked = {};
+            ui.kidUnlocked[ui.kidId] = true;
             save(); closeModal(); render(); toast('초기화했어요');
           }, true);
         }, true);
@@ -2063,23 +2916,38 @@
   });
 
   document.addEventListener('change', function(ev){
-    if(ev.target && ev.target.id === 'importFile'){
+    if(!ev.target) return;
+    if(ev.target.id === 'importFile'){
       var f = ev.target.files && ev.target.files[0];
       if(f) importBackup(f);
+      return;
+    }
+    if(ev.target.id === 'photoCam' || ev.target.id === 'photoAlbum'){
+      var pf = ev.target.files && ev.target.files[0];
+      ev.target.value = '';
+      if(pf) handlePhotoFile(pf);
     }
   });
 
   /* 날짜가 바뀌면 자동 새로고침 */
   setInterval(function(){
-    if(dateKey() !== currentDay){ render(); toast('새로운 하루예요! 오늘의 계획을 시작해요'); }
+    if(dateKey() !== currentDay){
+      ui.dayOffset = 0;
+      render();
+      toast('새로운 하루예요! 오늘의 계획을 시작해요');
+    }
   }, 30000);
   document.addEventListener('visibilitychange', function(){
-    if(!document.hidden && dateKey() !== currentDay) render();
+    if(!document.hidden && dateKey() !== currentDay){ ui.dayOffset = 0; render(); }
   });
 
   /* 시작 */
   render();
   if(!storageOK) showStorageWarning();
+  /* 클라우드는 이 기기에서 한 번 ‘지금 동기화’로 확인된 뒤부터 자동으로 오간다 */
+  if(cloudReady() && cloudCfg().verified && !cloudCfg().needsSetup){
+    cloudPull(true).then(function(){ cloudPush(true); });
+  }
 })();
 </script>
 </body>
