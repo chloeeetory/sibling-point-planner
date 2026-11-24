@@ -2315,19 +2315,24 @@
     }
     if(ui.view === 'parent') renderParentPanel();
   }
+  var cloudPullBusy = null;   /* 진행 중인 수신 요청 — 겹쳐서 두 번 받지 않는다 */
   function cloudPull(silent){
     if(!cloudReady()) return Promise.resolve(false);
+    if(cloudPullBusy) return cloudPullBusy;
     var url = cloudBase() + '/rest/v1/' + cloudTable() +
       '?id=eq.' + encodeURIComponent(cloudRow()) + '&select=state,updated_at';
-    return fetch(url, {headers: cloudHdrs({Accept: 'application/json'}), cache: 'no-store'})
+    var req = fetch(url, {headers: cloudHdrs({Accept: 'application/json'}), cache: 'no-store'})
       .then(function(r){ if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(function(rows){
         var c0 = cloudCfg();
         c0.needsSetup = false;          /* 테이블이 읽혔다는 건 준비가 끝났다는 뜻 */
         c0.lastError = '';
-        c0.verified = true;
         var row = rows && rows[0];
+        /* 서버에 이 가족 기록이 아직 없으면 연결만 확인하고 끝낸다.
+           여기서 verified를 켜면 새 기기의 빈 기본값이 1.8초 뒤 자동으로 올라가
+           다른 기기에 있던 기록을 덮어쓸 수 있다. */
         if(!row || !row.state) return false;
+        c0.verified = true;
         var at = Date.parse(row.updated_at || '') || Number(row.state.updatedAt) || 0;
         var seen = Number(cloudCfg().lastPulledAt) || 0;
         if(at && at <= seen) return false;            /* 이미 받은 버전이면 그대로 */
@@ -2349,6 +2354,9 @@
         return true;
       })
       .catch(function(e){ markCloudError(e); return false; });
+    cloudPullBusy = req;
+    req.then(function(){ if(cloudPullBusy === req) cloudPullBusy = null; });
+    return req;
   }
   function cloudPush(silent){
     if(!cloudReady()) return Promise.resolve(false);
@@ -3351,15 +3359,20 @@
     }
   }, 30000);
   document.addEventListener('visibilitychange', function(){
-    if(!document.hidden && dateKey() !== currentDay){ ui.dayOffset = 0; render(); }
+    if(document.hidden) return;
+    if(dateKey() !== currentDay){ ui.dayOffset = 0; render(); }
+    /* 홈 화면 아이콘으로 다시 열었을 때: 부모가 고친 최신 기록을 한 번 받아온다.
+       (이 기기 변경이 곧 올라갈 차례거나 동기화 중이면 건너뛴다) */
+    if(cloudReady() && !cloudCfg().needsSetup && !ui.cloudBusy && !cloudPushTimer) cloudPull(true);
   });
 
   /* 시작 */
   render();
   if(!storageOK) showStorageWarning();
-  /* 클라우드는 이 기기에서 한 번 ‘지금 동기화’로 확인된 뒤부터 자동으로 오간다 */
-  if(cloudReady() && cloudCfg().verified && !cloudCfg().needsSetup){
-    cloudPull(true).then(function(){ cloudPush(true); });
+  /* 시작: 이 기기에서 ‘지금 동기화’를 한 번도 누르지 않았어도(아이 폰 같은 새 기기) 서버의 최신 기록을 먼저 받아온다.
+     받아오기만 하고 올리지 않는다 — 이 기기의 빈 기본 데이터가 서버 기록을 덮어쓰지 않도록. */
+  if(cloudReady() && !cloudCfg().needsSetup){
+    cloudPull(true);
   }
 })();
 </script>
