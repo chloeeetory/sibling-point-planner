@@ -164,6 +164,15 @@
   .task.done .ck{background:var(--c);border-color:var(--c)}
   .task.done .ttitle{color:var(--ink-2);text-decoration:line-through;text-decoration-thickness:1.5px;text-decoration-color:var(--c2)}
   .task.done .tpts{background:#fff;color:var(--ink-3)}
+  /* 📷 사진 인증 대기: 사진을 올려야 완료되는 항목 (체크만으로는 완료되지 않는다) */
+  .task.needwait{background:#fff8f1;border-color:#fed7aa;border-style:dashed}
+  .task.needwait .ck{border-color:#fdba74;background:#fff;color:#ea580c;font-size:13px}
+  .task.needwait .ttag{color:#c2410c;background:#ffedd5}
+  .task.needwait .tpts{color:#c2410c;background:#ffedd5}
+  .task.needwait .tmeta{color:#b45309}
+  .prow.pcheck.on{background:#f0fdf4;border-radius:12px;padding-left:6px;padding-right:6px}
+  .mini.ok{background:var(--c);color:#fff}
+  .mini.amber{background:#ffedd5;color:#c2410c}
 
   .empty{
     text-align:center;padding:26px 16px;color:var(--ink-3);font-size:14px;font-weight:600;
@@ -1026,6 +1035,8 @@
     var scut = dateKey(addDays(new Date(), -SNAP_KEEP_DAYS));
     Object.keys(state.snapshots || {}).forEach(function(k){ if(k < scut) delete state.snapshots[k]; });
   })();
+  /* 사진 인증이 필요한데 사진 없이 남아 있는 체크(예전 기록·다른 기기 기록)를 시작할 때 바로잡는다 */
+  var photoFixCount = reconcilePhotoChecks();
   refreshToday();              /* 오늘 진행도 스냅샷을 지금 상태로 맞춘다 */
   save();                      /* 색 이전·스냅샷 보강 결과를 한 번 저장해 둔다 */
   var ui = {
@@ -1047,10 +1058,12 @@
     kpinBuffer: '',
     kpinError: '',
     pendingPhoto: null,    /* 사진을 올릴 항목 {taskId, dayKey} */
+    parentCheckOffset: 0,  /* 부모 체크 관리 시트가 보고 있는 날짜 (0=오늘, -1=어제, -2=그저께) */
+    pchecksAfterPhoto: null, /* 부모 체크 관리에서 사진을 올린 뒤 그 시트로 돌아오기 */
     cloudBusy: false
   };
-  /* 앱을 연 기기의 기본 아이 페이지는 바로 열어 둔다 (다른 아이 탭은 비밀번호 필요) */
-  ui.kidUnlocked[ui.kidId] = true;
+  /* 앱을 열었다고 아이 페이지 잠금을 풀지 않는다 — 아이별 PIN을 넣어야 열린다.
+     (부모 모드는 부모 PIN 0000 으로 열고, 그 안에서 모든 아이를 볼 수 있다) */
   var currentDay = dateKey();
   var lastPointsShown = {};
   var dashPhotoHtml = '';   /* 부모 한눈에 보기 아래 '최근 인증 사진' 카드 (dashHTML이 채운다) */
@@ -1106,9 +1119,22 @@
     var c = state.checks[key];
     return (c && c[id]) || {};
   }
+  /* 📷 사진 인증 규칙: 사진 인증이 필요한 항목은 그 날짜에 사진이 붙은 체크만 '완료'로 친다.
+     (부모가 직접 확인해 준 체크는 byParent 로 남겨 사진 없이도 완료로 인정한다) */
+  function photoRequired(t){ return !!(t && t.needPhoto); }
+  function checkVerified(t, entry){
+    if(!entry) return false;
+    if(!photoRequired(t)) return true;
+    return !!((entry.photo && entry.photo.src) || entry.byParent);
+  }
+  function photoMissing(t, entry){
+    if(!photoRequired(t)) return false;
+    if(entry && ((entry.photo && entry.photo.src) || entry.byParent)) return false;
+    return true;
+  }
   function doneCount(key, id){
     var ck = checksOf(key,id);
-    return tasksFor(id).filter(function(t){ return ck[t.id]; }).length;
+    return tasksFor(id).filter(function(t){ return checkVerified(t, ck[t.id]); }).length;
   }
   function pctOf(key, id){
     var ts = tasksFor(id);
@@ -1125,6 +1151,41 @@
     state.checks[dayKey] = state.checks[dayKey] || {};
     state.checks[dayKey][kidId] = state.checks[dayKey][kidId] || {};
     return state.checks[dayKey][kidId];
+  }
+  /* 사진 인증이 필요한데 사진 없이 남아 있는 체크를 되돌린다 (오늘·어제·그저께).
+     - 예전에 요구가 없을 때 했던 체크나, 다른 기기에서 그대로 올라온 체크를 앱을 열 때 바로잡는다
+     - 그 체크로 적립됐던 포인트(장부)도 함께 회수한다. 사진을 올리면 그때 포인트로 다시 적립된다. */
+  function reconcilePhotoChecks(){
+    var n = 0, touched = [];
+    for(var off=0; off>=-2; off--){
+      var k = dateKey(addDays(new Date(), off));
+      var day = state.checks[k];
+      if(!day) continue;
+      Object.keys(day).forEach(function(cid){
+        var b = day[cid] || {};
+        Object.keys(b).forEach(function(tid){
+          var t = findTask(tid);
+          if(!t || !photoRequired(t)) return;
+          var e = b[tid];
+          if(!e || e.photo || e.byParent) return;
+          if(e.ledgerId){
+            for(var j=state.ledger.length-1;j>=0;j--){
+              if(state.ledger[j].id===e.ledgerId){ state.ledger.splice(j,1); break; }
+            }
+          }
+          delete b[tid];
+          n++;
+          if(touched.indexOf(k) < 0) touched.push(k);
+        });
+        if(!Object.keys(b).length) delete day[cid];
+      });
+      if(!Object.keys(day).length) delete state.checks[k];
+    }
+    touched.forEach(function(k){
+      state.children.forEach(function(c){ refreshSnapshot(k, c.id); });
+    });
+    if(n) state.updatedAt = Date.now();
+    return n;
   }
   function kidPinCfg(id){
     var kp = (state.settings && state.settings.kidPins && state.settings.kidPins[id]) || null;
@@ -1169,7 +1230,7 @@
       var k = dateKey(addDays(new Date(), -i));
       var ts = tasksFor(id);
       var ck = checksOf(k,id);
-      var all = ts.length>0 && ts.every(function(t){ return ck[t.id]; });
+      var all = ts.length>0 && ts.every(function(t){ return checkVerified(t, ck[t.id]); });
       if(all){ n++; }
       else if(i===0){ continue; }
       else { break; }
@@ -1203,7 +1264,7 @@
     var ts = tasksFor(childId);
     var ck = checksOf(dayKey, childId);
     var items = [], done = 0;
-    ts.forEach(function(t){ if(ck[t.id]){ done++; items.push(t.title); } });
+    ts.forEach(function(t){ if(checkVerified(t, ck[t.id])){ done++; items.push(t.title); } });
     var total = ts.length;
     return {done:done, total:total, pct: total ? Math.round(done/total*100) : 0,
             points: earnedOn(dayKey, childId), items: items};
@@ -1328,24 +1389,34 @@
       render(); toast('먼저 비밀번호를 넣어 주세요');
       return;
     }
-    var bucket = ensureBucket(day, t.childId);
-    var cur = bucket[t.id];
+    var cur = checksOf(day, t.childId)[t.id];
+    /* 사진 인증이 필요한 항목: 사진이 없으면 체크로 완료되지 않는다 → 사진 인증 창부터 열어 준다 */
+    if(photoMissing(t, cur)){
+      photoSheet(t.id, day);
+      toast('📸 먼저 인증 사진을 올려 주세요');
+      return;
+    }
     /* 이미 완료한 항목에 사진이 있으면, 누를 때 사진을 크게 보여 준다 (체크 취소는 사진 화면에서) */
     if(cur && cur.photo){ openPhotoView(t.childId, day, t.id); return; }
     if(cur){ uncheckTask(day, t.childId, t.id); return; }
-    if(t.needPhoto){ photoSheet(t.id, day); toast('이 항목은 사진 인증이 필요해요'); return; }
     checkTask(day, t.childId, t.id);
   }
 
-  function checkTask(day, kidId, taskId){
+  function checkTask(day, kidId, taskId, opts){
     var t = findTask(taskId);
     if(!t) return;
     if(kidLocked(kidId)){ toast('먼저 비밀번호를 넣어 주세요'); return; }
     var bucket = ensureBucket(day, kidId);
     if(bucket[taskId]) return;                       /* 중복 적립 방지 */
+    /* 방어: 사진 인증이 필요한 항목은 사진 없이 적립되지 않는다 (부모 모드에서 직접 완료한 byParent 만 예외) */
+    if(photoMissing(t, bucket[taskId]) && !(opts && opts.byParent)){
+      photoSheet(taskId, day);
+      toast('📸 먼저 인증 사진을 올려 주세요');
+      return;
+    }
     var before = pctOf(day, kidId);
     var e = addEntry(kidId, t.points, 'earn', t.title, {taskId: t.id}, day);
-    bucket[taskId] = {ts: Date.now(), ledgerId: e.id};
+    bucket[taskId] = (opts && opts.byParent) ? {ts: Date.now(), ledgerId: e.id, byParent: true} : {ts: Date.now(), ledgerId: e.id};
     refreshSnapshot(day, kidId);
     state.updatedAt = Date.now();
     save(); render();
@@ -1608,21 +1679,26 @@
         list.innerHTML = '<div class="empty">아직 ' + (ui.dayOffset === 0 ? '오늘' : DAY_LABELS[-ui.dayOffset]) + '의 계획이 없어요.<br>부모 모드 ⚙️에서 항목을 추가해 주세요.</div>';
       } else {
         list.innerHTML = ts.map(function(t){
-          var on = !!ck[t.id];
           var entry = ck[t.id];
           var ph = entry && entry.photo;
+          var on = checkVerified(t, entry);
+          var wait = photoMissing(t, entry);          /* 사진 인증 대기 */
           var meta = [t.time, t.note].filter(Boolean).join(' · ');
+          var tag = '';
+          if(t.needPhoto) tag = '<span class="ttag">' + (ph ? '📷 인증' : (entry && entry.byParent ? '✅ 부모 확인' : '📷 인증')) + '</span>';
+          else if(ph) tag = '<span class="ttag">📷 사진</span>';
           var photoBtn = ph
             ? '<button class="tphotobtn" data-act="view-photo" data-kid="' + c.id + '" data-day="' + day + '" data-id="' + t.id + '" aria-label="' + esc(t.title) + ' 인증 사진 크게 보기"><img src="' + esc(ph.src) + '" alt="인증 사진"></button>'
             : '<button class="tphotobtn" data-act="photo" data-id="' + t.id + '" aria-label="' + esc(t.title) + ' 사진 인증 올리기">📷</button>';
-          return '<div class="task' + (on?' done':'') + '">' +
+          return '<div class="task' + (on?' done':'') + (wait?' needwait':'') + '">' +
             '<button class="tmainbtn" data-act="toggle" data-id="' + t.id + '" aria-pressed="' + on + '">' +
-              '<span class="ck">' + (on ? '✓' : '') + '</span>' +
+              '<span class="ck">' + (on ? '✓' : (wait ? '📷' : '')) + '</span>' +
               '<span class="tmain">' +
-                '<span class="ttitle">' + esc(t.title) + (t.needPhoto ? '<span class="ttag">📷 인증</span>' : '') + '</span>' +
+                '<span class="ttitle">' + esc(t.title) + tag + '</span>' +
                 (meta ? '<span class="tmeta">' + esc(meta) + '</span>' : '') +
+                (wait ? '<span class="tmeta">📸 사진을 올리면 완료돼요</span>' : '') +
               '</span>' +
-              '<span class="tpts">' + (on ? '완료 +' : '+') + t.points + 'P</span>' +
+              '<span class="tpts">' + (on ? '완료 +' : (wait ? '📷 +' : '+')) + t.points + 'P</span>' +
             '</button>' + photoBtn +
           '</div>';
         }).join('');
@@ -2025,6 +2101,7 @@
     if(kidLocked(c.id)){ toast('먼저 ' + c.name + '의 비밀번호를 넣어 주세요'); return; }
     var day = dayKey || selKey();
     var entry = checksOf(day, c.id)[taskId];
+    var wait = photoMissing(t, entry);
     ui.pendingPhoto = {taskId: taskId, dayKey: day};
     openSheet(
       '<h3>📷 사진 인증</h3>' +
@@ -2036,9 +2113,14 @@
         '<button class="btn-ghost" data-act="photo-album">🖼 앨범에서 고르기</button>' +
       '</div>' +
       '<div class="hint" style="margin-top:10px;text-align:center">' +
-        (entry ? '이미 완료한 항목이에요. 사진을 올리면 새 사진으로 바꿔요.' : '사진을 올리면 이 항목이 완료되고 ' + t.points + 'P가 적립돼요.') +
+        (entry && entry.photo ? '이미 완료한 항목이에요. 사진을 올리면 새 사진으로 바꿔요.'
+          : wait ? '📸 먼저 인증 사진을 올려 주세요.<br>사진을 올리면 이 항목이 완료되고 ' + t.points + 'P가 적립돼요.'
+          : '사진을 올리면 이 항목이 완료되고 ' + t.points + 'P가 적립돼요.') +
       '</div>' +
-      '<div class="sheet-actions" style="margin-top:12px"><button class="btn-ghost" data-act="close-modal">닫기</button></div>'
+      '<div class="sheet-actions" style="margin-top:12px">' +
+        (entry && !entry.photo ? '<button class="btn-ghost" style="color:#dc2626" data-act="uncheck" data-kid="' + esc(c.id) + '" data-id="' + esc(taskId) + '" data-day="' + esc(day) + '">체크 취소</button>' : '') +
+        '<button class="btn-ghost" data-act="close-modal">닫기</button>' +
+      '</div>'
     );
   }
 
@@ -2054,6 +2136,10 @@
         '<span>' + fmtDate(dayKey) + ' ' + fmtTime(ph.ts) + '</span></div>' +
       '<div class="photo-big"><img src="' + esc(ph.src) + '" alt="' + esc(t ? t.title : '') + ' 인증 사진"></div>' +
       '<div class="hint" style="text-align:center;margin-bottom:10px">' + (ph.mode === 'cloud' ? '☁️ 클라우드에 저장된 사진' : '이 기기에 저장된 사진') + '</div>' +
+      '<div class="sheet-actions" style="margin-bottom:8px">' +
+        '<button class="btn-ghost" data-act="photo-replace" data-id="' + esc(taskId) + '" data-day="' + esc(dayKey) + '">🔄 사진 바꾸기</button>' +
+        '<button class="btn-ghost" style="color:#dc2626" data-act="del-photo" data-kid="' + esc(kidId) + '" data-id="' + esc(taskId) + '" data-day="' + esc(dayKey) + '">🗑 사진 삭제</button>' +
+      '</div>' +
       '<div class="sheet-actions">' +
         '<button class="btn-ghost" data-act="close-modal">닫기</button>' +
         '<button class="btn-ghost" style="color:#dc2626" data-act="uncheck" data-kid="' + esc(kidId) + '" data-id="' + esc(taskId) + '" data-day="' + esc(dayKey) + '">체크 취소</button>' +
@@ -2090,6 +2176,43 @@
     img.src = objUrl;
   }
 
+  /* 사진만 지운다. 사진 인증이 필요한 항목이면 완료·포인트도 함께 취소된다. */
+  function deletePhoto(taskId, kidId, dayKey){
+    var t = findTask(taskId);
+    var day = dayKey || selKey();
+    var cid = kidId || (t && t.childId) || kid(ui.kidId).id;
+    if(kidLocked(cid)){ closeModal(); toast('먼저 비밀번호를 넣어 주세요'); return; }
+    var bucket = ensureBucket(day, cid);
+    var e = bucket[taskId];
+    if(!e || !e.photo){ closeModal(); return; }
+    var finish = function(){
+      delete e.photo;
+      var msg;
+      if(t && photoRequired(t) && !e.byParent){
+        delete bucket[taskId];
+        if(e.ledgerId){
+          for(var j=state.ledger.length-1;j>=0;j--){
+            if(state.ledger[j].id===e.ledgerId){ state.ledger.splice(j,1); break; }
+          }
+        }
+        msg = '🗑 사진을 지워 완료와 ' + (t ? t.points : 0) + 'P도 취소했어요';
+      } else {
+        msg = '🗑 사진만 지웠어요 (체크는 그대로)';
+      }
+      refreshSnapshot(day, cid);
+      state.updatedAt = Date.now();
+      save(); closeModal(); render();
+      toast(msg);
+    };
+    if(t && photoRequired(t) && !e.byParent){
+      confirmAsk('사진을 지울까요?',
+        '📷 사진 인증이 필요한 항목이라 <b>완료와 +' + t.points + 'P</b>도 함께 취소돼요.<br>다시 찍으면 또 적립돼요.',
+        '사진 지우기', finish, true);
+    } else {
+      finish();
+    }
+  }
+
   function handlePhotoFile(file){
     var pend = ui.pendingPhoto;
     if(!pend){ toast('먼저 항목의 📷 버튼을 눌러 주세요'); return; }
@@ -2116,9 +2239,14 @@
       earned = true;
     }
     entry.photo = {src: dataUrl, ts: Date.now(), w: (dim && dim.w) || 0, h: (dim && dim.h) || 0, mode: 'local'};
+    delete entry.byParent;
     refreshSnapshot(day, cid);
     state.updatedAt = Date.now();
     save(); closeModal(); render();
+    if(ui.pchecksAfterPhoto){
+      var pc = ui.pchecksAfterPhoto; ui.pchecksAfterPhoto = null;
+      parentChecksSheet(pc.cid, pc.off);
+    }
     chime(true); vibrate(18); confetti(earned ? 16 : 8);
     toast(earned ? '📷 사진 인증 완료! +' + t.points + 'P' : '📷 사진을 첨부했어요');
     if(cloudReady() && cloudCfg().verified && !cloudCfg().needsSetup){
@@ -2342,7 +2470,11 @@
         state = next;
         if(!state.children.some(function(c){ return c.id === ui.kidId; })) ui.kidId = state.children[0].id;
         ui.manageKid = ui.kidId;
-        ui.kidUnlocked[ui.kidId] = true;
+        /* 잠금이 켜진 아이는 동기화 뒤에도 잠긴 채로 둔다 — 동기화가 잠금을 대신 풀지 않는다
+           (이미 이번에 PIN을 넣어 연 아이는 그대로 연다) */
+        /* 다른 기기에서 사진 없이 완료된 인증 필수 항목을 바로잡는다 */
+        var fixed = reconcilePhotoChecks();
+        refreshToday();
         keep.lastPulledAt = at || Date.now();
         keep.lastSync = Date.now();
         keep.lastError = '';
@@ -2350,7 +2482,7 @@
         keep.verified = true;
         save(true);
         render();
-        if(!silent) toast('☁️ 클라우드에서 최신 기록을 받았어요');
+        if(!silent) toast(fixed ? '☁️ 최신 기록을 받고 📷 사진 없는 ' + fixed + '개 체크를 되돌렸어요' : '☁️ 클라우드에서 최신 기록을 받았어요');
         return true;
       })
       .catch(function(e){ markCloudError(e); return false; });
@@ -2479,6 +2611,7 @@
         '</div>' +
         '<div class="dk-days">' + days + '</div>' +
         '<div class="dk-foot"><span class="pin-meta">📷 7일 인증 ' + photos + '장 · 연속 ' + streakOf(c.id) + '일' + (pendN ? ' · 📱 신청 ' + pendN + '건(' + pendMins + '분)' : '') + '</span>' +
+          '<button class="mini ok" data-act="parent-checks" data-id="' + c.id + '">✅ 체크 관리</button>' +
           '<button class="mini" data-act="goto-kid" data-id="' + c.id + '">페이지 보기</button></div>' +
       '</div>';
     }).join('');
@@ -2503,6 +2636,58 @@
   }
 
   function photosHTML(){ return dashPhotoHtml || ''; }
+
+  /* ═══════════ ✅ 부모: 아이 체크 직접 관리 (오늘·어제·그저께) ═══════════ */
+  function parentChecksSheet(childId, dayOffset){
+    var c = kid(childId);
+    var off = clamp((typeof dayOffset === 'number' ? dayOffset : (ui.parentCheckOffset || 0)), -2, 0);
+    ui.parentCheckOffset = off;
+    var day = dateKey(addDays(new Date(), off));
+    var ck = checksOf(day, c.id);
+    var ts = tasksFor(c.id);
+    var chips = '';
+    for(var o=0; o>=-2; o--){
+      var k = dateKey(addDays(new Date(), o));
+      var r = recordOf(k, c.id);
+      var total = ts.length;
+      chips += '<button class="chip' + (o===off?' on':'') + '" data-act="pcheck-day" data-kid="' + esc(c.id) + '" data-off="' + o + '">' +
+        DAY_LABELS[-o] + ' · ' + (r ? (r.done + '/' + (r.total || total)) : ('0/' + total)) + '</button>';
+    }
+    var rows = ts.length ? ts.map(function(t){
+      var e = ck[t.id];
+      var on = checkVerified(t, e);
+      var ph = e && e.photo;
+      var flag = '';
+      if(photoRequired(t)) flag = ph ? '📷 사진 있음' : (e && e.byParent ? '✅ 부모 확인 완료' : '📷 사진 없음');
+      return '<div class="prow pcheck' + (on?' on':'') + '">' +
+        '<div style="flex:1;min-width:0">' +
+          '<div class="pin-name">' + (on ? '✓ ' : '') + esc(t.title) + '</div>' +
+          '<div class="pin-meta">' + esc([t.time, '+' + t.points + 'P', flag].filter(Boolean).join(' · ')) + '</div>' +
+        '</div>' +
+        (photoRequired(t) ? '<button class="mini' + (ph ? '' : ' amber') + '" data-act="pcheck-photo" data-kid="' + esc(c.id) + '" data-day="' + esc(day) + '" data-id="' + esc(t.id) + '">📷</button>' : '') +
+        '<button class="mini' + (on?' warn':' ok') + '" data-act="pcheck-toggle" data-kid="' + esc(c.id) + '" data-day="' + esc(day) + '" data-id="' + esc(t.id) + '">' + (on ? '완료 취소' : '완료') + '</button>' +
+      '</div>';
+    }).join('') : '<div class="hint" style="padding:8px 0">등록된 항목이 없어요.</div>';
+    openSheet(
+      '<h3>✅ ' + esc(c.emoji) + ' ' + esc(c.name) + ' 체크 관리</h3>' +
+      '<div class="sub">부모 모드에서는 아이 대신 완료·취소를 직접 바꿀 수 있어요. 포인트와 진행도 기록이 같이 바뀌고, 사진 인증이 필요한 항목은 📷 버튼으로 사진을 올리거나 <b>완료</b>로 부모 확인을 남길 수 있어요.</div>' +
+      '<div class="chipline">' + chips + '</div>' +
+      rows +
+      '<div class="sheet-actions" style="margin-top:12px"><button class="btn-ghost" data-act="close-modal">닫기</button></div>'
+    );
+  }
+
+  function parentToggleTask(taskId, childId, dayKey){
+    var t = findTask(taskId);
+    if(!t) return;
+    var day = dayKey || selKey();
+    var cid = childId || t.childId;
+    var e = checksOf(day, cid)[taskId];
+    if(e){ uncheckTask(day, cid, taskId); }
+    else if(photoRequired(t)){ checkTask(day, cid, taskId, {byParent: true}); }
+    else { checkTask(day, cid, taskId); }
+    parentChecksSheet(cid, ui.parentCheckOffset || 0);
+  }
 
   /* ═══════════ 📱 핸드폰 보상 신청 내역 (부모) ═══════════ */
   function gasBadge(n){ return '<span class="dk-badge">📱 대기 ' + n + '</span>'; }
@@ -2870,10 +3055,13 @@
     var note = (document.getElementById('f-note').value || '').trim();
     var needPhoto = !!(document.getElementById('f-needphoto') && document.getElementById('f-needphoto').checked);
     if(id){
+      var wasNeedPhoto = false;
       state.tasks.forEach(function(t){
-        if(t.id===id){ t.title=title; t.points=points; t.childId=childId; t.time=time; t.note=note; t.needPhoto=needPhoto; }
+        if(t.id===id){ wasNeedPhoto = !!t.needPhoto; t.title=title; t.points=points; t.childId=childId; t.time=time; t.note=note; t.needPhoto=needPhoto; }
       });
-      toast('계획을 수정했어요');
+      /* 사진 인증 필요를 켜면, 사진 없이 완료돼 있던 오늘·어제·그저께 체크를 되돌린다 */
+      var dropped = (needPhoto && !wasNeedPhoto) ? reconcilePhotoChecks() : 0;
+      toast('계획을 수정했어요' + (dropped ? ' · 사진이 없던 ' + dropped + '개 체크를 완료에서 되돌렸어요' : ''));
     } else {
       state.tasks.push({id:uid(), childId:childId, title:title, time:time, note:note, points:points, order:state.tasks.length, needPhoto:needPhoto});
       toast('계획을 추가했어요');
@@ -3111,6 +3299,25 @@
       case 'view-photo':
         openPhotoView(el.getAttribute('data-kid'), el.getAttribute('data-day'), id);
         break;
+      case 'photo-replace':
+        photoSheet(id, el.getAttribute('data-day'));
+        break;
+      case 'del-photo':
+        deletePhoto(id, el.getAttribute('data-kid'), el.getAttribute('data-day'));
+        break;
+      case 'parent-checks':
+        parentChecksSheet(id, 0);
+        break;
+      case 'pcheck-day':
+        parentChecksSheet(el.getAttribute('data-kid'), parseInt(el.getAttribute('data-off'), 10) || 0);
+        break;
+      case 'pcheck-toggle':
+        parentToggleTask(id, el.getAttribute('data-kid'), el.getAttribute('data-day'));
+        break;
+      case 'pcheck-photo':
+        ui.pchecksAfterPhoto = {cid: el.getAttribute('data-kid'), off: ui.parentCheckOffset || 0};
+        photoSheet(id, el.getAttribute('data-day'));
+        break;
       case 'photo-cam':
       case 'photo-album':
         var input = document.getElementById(act === 'photo-cam' ? 'photoCam' : 'photoAlbum');
@@ -3210,6 +3417,9 @@
         break;
       case 'lock-parent':
         ui.parentUnlocked = false; ui.pinBuffer=''; ui.pinError='';
+        /* 부모 모드를 잠그면 아이 페이지도 다시 잠근다 (PIN을 넣어야 열린다) */
+        Object.keys(ui.kidUnlocked).forEach(function(k){ if(kidPinEnabled(k)) delete ui.kidUnlocked[k]; });
+        ui.kpinBuffer = ''; ui.kpinError = '';
         render();
         toast('부모 모드를 잠갔어요');
         break;
@@ -3369,6 +3579,11 @@
   /* 시작 */
   render();
   if(!storageOK) showStorageWarning();
+  if(photoFixCount){
+    setTimeout(function(){
+      toast('📷 사진이 없던 ' + photoFixCount + '개 체크를 완료에서 되돌렸어요 · 사진을 올리면 다시 적립돼요');
+    }, 600);
+  }
   /* 시작: 이 기기에서 ‘지금 동기화’를 한 번도 누르지 않았어도(아이 폰 같은 새 기기) 서버의 최신 기록을 먼저 받아온다.
      받아오기만 하고 올리지 않는다 — 이 기기의 빈 기본 데이터가 서버 기록을 덮어쓰지 않도록. */
   if(cloudReady() && !cloudCfg().needsSetup){
