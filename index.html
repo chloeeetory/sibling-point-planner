@@ -200,6 +200,28 @@
   .rbtn[disabled]{background:#f1f3f7;color:var(--ink-3);cursor:not-allowed}
   .rbtn .short{font-size:11.5px;font-weight:700;display:block;margin-top:-1px}
   .shopnote{margin-top:10px;font-size:12.5px;color:var(--ink-2);font-weight:600;text-align:center;background:#fff;border-radius:14px;padding:10px}
+  .reward .rmins{font-size:11px;font-weight:800;color:var(--c);background:var(--soft);border-radius:8px;padding:2px 7px;margin:1px 0 3px;white-space:nowrap}
+  .reward .rpend{font-size:10.5px;font-weight:800;color:#92620a;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:2px 6px;margin-top:6px}
+
+  /* ── 핸드폰 시간 신청 내역 ── */
+  .reqrow{border-radius:16px;background:#fff;box-shadow:var(--shadow-sm);border:1.5px solid #f4f6fa;padding:11px 12px;margin-bottom:8px}
+  .reqrow.pending{border-color:#fde68a;background:linear-gradient(180deg,#fffdf5,#fff 70%)}
+  .reqrow:last-child{margin-bottom:0}
+  .req-top{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .req-kid{font-size:13px;font-weight:800;letter-spacing:-.02em}
+  .req-state{margin-left:auto;font-size:10.5px;font-weight:800;border-radius:8px;padding:3px 7px;background:#f4f6fa;color:var(--ink-3);white-space:nowrap}
+  .req-state.pending{background:#fffbeb;color:#92620a;border:1px solid #fde68a}
+  .req-state.done{background:#eefaf3;color:#15803d;border:1px solid #bbf7d0}
+  .req-state.canceled{background:#f4f6fa;color:#94a3b8}
+  .req-title{font-size:14.5px;font-weight:800;margin-top:6px;letter-spacing:-.02em;word-break:keep-all}
+  .req-meta{font-size:11.5px;font-weight:700;color:var(--ink-3);margin-top:3px}
+  .req-guide{font-size:11px;font-weight:700;color:var(--ink-2);background:#f6f9fe;border-radius:10px;padding:7px 9px;margin-top:7px;line-height:1.45;word-break:keep-all}
+  .req-btns{display:flex;gap:6px;margin-top:8px}
+  .req-btns .mini{flex:1;min-height:38px}
+  .req-sum{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px}
+  .req-sum span{font-size:11px;font-weight:800;border-radius:9px;padding:5px 8px;background:#f6f9fe;color:var(--ink-2)}
+  .dk-badge{font-size:10px;font-weight:800;color:#92620a;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:1px 5px;margin-left:3px;white-space:nowrap}
+  .navbadge{position:absolute;top:5px;left:calc(50% + 9px);min-width:16px;height:16px;border-radius:8px;background:#f59e0b;color:#fff;font-size:10px;font-weight:900;display:grid;place-items:center;padding:0 4px;line-height:1}
 
   /* ── 기록 ── */
   .chart{display:flex;align-items:flex-end;gap:7px;height:132px;padding:8px 2px 0}
@@ -383,7 +405,7 @@
     border-top:1px solid rgba(238,240,244,.95);
   }
   .navinner{max-width:520px;margin:0 auto;display:flex;height:var(--nav-h)}
-  .navbtn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--ink-3);font-size:11px;font-weight:800}
+  .navbtn{flex:1;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--ink-3);font-size:11px;font-weight:800}
   .navbtn .nemoji{font-size:19px;line-height:1.1;filter:grayscale(1);opacity:.72;transition:all .18s ease}
   .navbtn.on{color:var(--c)}
   .navbtn.on .nemoji{filter:none;opacity:1;transform:translateY(-1px)}
@@ -473,6 +495,13 @@
         </div>
         <div class="shopgrid" id="shopGrid"></div>
         <div class="shopnote" id="shopNote"></div>
+      </div>
+      <div class="section">
+        <div class="sec-head">
+          <div class="sec-title">📱 핸드폰 시간 신청</div>
+          <div class="sec-note" id="myReqNote"></div>
+        </div>
+        <div id="myRequests"></div>
       </div>
       <div class="section">
         <div class="sec-head">
@@ -570,7 +599,7 @@
     <button class="navbtn" data-act="nav" data-view="today"><span class="nemoji">📋</span>오늘</button>
     <button class="navbtn" data-act="nav" data-view="shop"><span class="nemoji">🎁</span>상점</button>
     <button class="navbtn" data-act="nav" data-view="history"><span class="nemoji">📊</span>기록</button>
-    <button class="navbtn" data-act="nav" data-view="parent"><span class="nemoji">⚙️</span>부모</button>
+    <button class="navbtn" data-act="nav" data-view="parent"><span class="nemoji">⚙️</span>부모<span class="navbadge" id="parentBadge" hidden>0</span></button>
   </div>
 </nav>
 
@@ -655,10 +684,11 @@
 
   /* ═══════════ 기본 데이터 ═══════════ */
   function defaultState(){
+    /* device: 시간 보상을 반영하는 방법을 안내할 때 쓴다 (ios=아이폰 스크린 타임 직접, android=패밀리 링크) */
     var kids = [
-      {id:'jimin', name:'지민', grade:'6학년', emoji:'💙', color:'#2f6bf0', soft:'#dceaff'},
-      {id:'jiho',  name:'지호', grade:'5학년', emoji:'🚀', color:'#6366f1', soft:'#e8e8ff'},
-      {id:'jiyoon',name:'지윤', grade:'3학년', emoji:'🍀', color:'#0d9488', soft:'#ccfbf1'}
+      {id:'jimin', name:'지민', grade:'6학년', emoji:'💙', color:'#2f6bf0', soft:'#dceaff', device:'ios'},
+      {id:'jiho',  name:'지호', grade:'5학년', emoji:'🚀', color:'#6366f1', soft:'#e8e8ff', device:'android'},
+      {id:'jiyoon',name:'지윤', grade:'3학년', emoji:'🍀', color:'#0d9488', soft:'#ccfbf1', device:'android'}
     ];
     var tasks = [];
     var order = 0;
@@ -685,6 +715,8 @@
     mk('jiyoon','잘 준비하고 양치','21:00','내일 옷까지',5);
 
     var rewards = [
+      /* minutes > 0 이면 '핸드폰 사용시간' 보상: 대금을 내면 곷로 신청되고, 부모가 시간을 넣고 '반영 완료'를 누릅니다 */
+      {id:uid(), title:'핸드폰 사용시간 추가', minutes:30, cost:30, emoji:'📱', desc:'부모 확인 후 시간이 늘어나요'},
       {id:uid(), title:'간식 고르기', cost:20, emoji:'🍦', desc:'마트에서 하나'},
       {id:uid(), title:'자유시간 30분', cost:30, emoji:'🎮', desc:'하고 싶은 거'},
       {id:uid(), title:'가족 영화의 밤', cost:80, emoji:'🎬', desc:'볼 영화 정하기'},
@@ -692,10 +724,12 @@
     ];
 
     return {
-      version: 4,
+      version: 5,
       children: kids,
       tasks: tasks,
       rewards: rewards,
+      /* 핸드폰 사용시간 신청 내역 {id, childId, rewardId, title, emoji, minutes, cost, ts, status:'pending'|'done'|'canceled', doneTs, ledgerId} */
+      requests: [],
       ledger: [],
       checks: {},
       /* 진행도 스냅샷: { 'YYYY-MM-DD': { 아이id: {done,total,pct,points,items,updatedAt} } }
@@ -703,6 +737,8 @@
       snapshots: {},
       settings: {
         pin:'0000', sound:true,
+        /* v5: 예전 저장 데이터에 핸드폰 시간 보상 예시를 한 번만 넣었는지 */
+        phoneSeeded: true,
         /* 아이별 4자리 비밀번호 (아이 탭을 바꿀 때 물어본다) */
         kidPins: {
           jimin:  {pin:'1111', lock:true},
@@ -735,12 +771,14 @@
     if(!Array.isArray(s.children) || !s.children.length) s.children = d.children;
     if(!Array.isArray(s.tasks)) s.tasks = [];
     if(!Array.isArray(s.rewards)) s.rewards = d.rewards;
+    if(!Array.isArray(s.requests)) s.requests = [];
     if(!Array.isArray(s.ledger)) s.ledger = [];
     if(!s.checks || typeof s.checks !== 'object') s.checks = {};
     if(!s.snapshots || typeof s.snapshots !== 'object') s.snapshots = {};
     if(!s.settings || typeof s.settings !== 'object') s.settings = {pin:'0000', sound:true};
     if(typeof s.settings.pin !== 'string' || !/^\d{4}$/.test(s.settings.pin)) s.settings.pin = '0000';
     if(typeof s.settings.sound !== 'boolean') s.settings.sound = true;
+    if(typeof s.settings.phoneSeeded !== 'boolean') s.settings.phoneSeeded = false;
     /* v4: 아이별 비밀번호 · 클라우드 설정 */
     if(!s.settings.cloud || typeof s.settings.cloud !== 'object') s.settings.cloud = {};
     var cl = s.settings.cloud;
@@ -767,6 +805,10 @@
       c.emoji = c.emoji || '🙂';
       c.color = c.color || '#2f6bf0';
       c.soft = c.soft || '#dceaff';
+      /* v5: 기기 구분 — 처음 보는 저장 데이터는 알려진 세 남매로 기본값을 잡아 둔다 */
+      if(c.device !== 'ios' && c.device !== 'android'){
+        c.device = ({jimin:'ios', jiho:'android', jiyoon:'android'})[c.id] || 'android';
+      }
       if(upgrading){
         paletteUpgraded = true;
         var lc = String(c.color).toLowerCase(), ls = String(c.soft).toLowerCase();
@@ -803,7 +845,35 @@
       r.cost = Math.max(1, parseInt(r.cost,10) || 1);
       r.emoji = r.emoji || '🎁';
       r.desc = r.desc || '';
+      /* v5: 핸드폰 사용시간 보상이면 분(1~600)을 함께 저장한다. 0이면 일반 보상(바로 교환) */
+      r.minutes = clamp(parseInt(r.minutes,10) || 0, 0, 600);
       return r;
+    });
+    /* v5: 예전 저장 데이터에는 시간 보상이 없다 → 기본 예시를 한 번만 넣고, 지우면 다시 생기지 않는다 */
+    if(!s.settings.phoneSeeded){
+      if(!s.rewards.some(function(r){ return r.minutes > 0; })){
+        var seed = d.rewards.filter(function(r){ return r.minutes > 0; })[0];
+        if(seed) s.rewards.push({id:uid(), title:seed.title, minutes:seed.minutes, cost:seed.cost, emoji:seed.emoji, desc:seed.desc});
+      }
+      s.settings.phoneSeeded = true;
+    }
+    /* v5: 핸드폰 시간 신청 내역 정리 (없는 아이의 신청은 버린다) */
+    s.requests = s.requests.filter(function(q){
+      if(!q || typeof q !== 'object' || !q.childId) return false;
+      return s.children.some(function(c){ return c.id === q.childId; });
+    }).map(function(q){
+      q.id = q.id || uid();
+      q.rewardId = q.rewardId || '';
+      q.title = q.title || '핸드폰 사용시간';
+      q.emoji = q.emoji || '📱';
+      q.minutes = clamp(parseInt(q.minutes,10) || 1, 1, 600);
+      q.cost = Math.max(0, parseInt(q.cost,10) || 0);
+      q.ts = typeof q.ts === 'number' ? q.ts : Date.now();
+      q.date = q.date || dateKey(new Date(q.ts));
+      q.status = (q.status === 'done' || q.status === 'canceled') ? q.status : 'pending';
+      q.doneTs = typeof q.doneTs === 'number' ? q.doneTs : 0;
+      q.ledgerId = q.ledgerId || '';
+      return q;
     });
     s.ledger = s.ledger.filter(function(e){ return e && typeof e.amount === 'number' && e.childId; }).map(function(e){
       e.id = e.id || uid();
@@ -815,7 +885,7 @@
     });
     normalizeSnapshots(s);     /* v3: 진행도 스냅샷 정리 · 없는 지난 날은 기록에서 되살린다 */
     normalizeChecks(s);        /* v4: 체크 기록 · 인증 사진 구조 정리 */
-    s.version = 4;
+    s.version = 5;
     return s;
   }
 
@@ -971,6 +1041,7 @@
   ui.kidUnlocked[ui.kidId] = true;
   var currentDay = dateKey();
   var lastPointsShown = {};
+  var dashPhotoHtml = '';   /* 부모 한눈에 보기 아래 '최근 인증 사진' 카드 (dashHTML이 채운다) */
 
   /* ═══════════ 조회 헬퍼 ═══════════ */
   function kid(id){
@@ -987,6 +1058,37 @@
   }
   function pointsOf(id){
     return state.ledger.reduce(function(s,e){ return e.childId===id ? s+e.amount : s; }, 0);
+  }
+  /* ═══════════ 핸드폰 사용시간 보상 ═══════════ */
+  function isTimeReward(r){ return !!r && (parseInt(r.minutes,10) || 0) > 0; }
+  function requestsOf(childId){
+    return (state.requests || []).filter(function(q){ return q.childId===childId; })
+      .sort(function(a,b){ return b.ts - a.ts; });
+  }
+  function pendingRequestsOf(childId){
+    return requestsOf(childId).filter(function(q){ return q.status==='pending'; });
+  }
+  function pendingRequests(){
+    return (state.requests || []).filter(function(q){ return q.status==='pending'; })
+      .sort(function(a,b){ return a.ts - b.ts; });
+  }
+  function pendingCountFor(childId, rewardId){
+    return (state.requests || []).filter(function(q){
+      return q.childId===childId && q.status==='pending' && (!rewardId || q.rewardId===rewardId);
+    }).length;
+  }
+  /* 아이 기기에 따른 반영 방법 안내 (지민 아이폰 · 지호·지윤 안드로이드) */
+  function applyGuide(c){
+    if(!c) return '';
+    if(c.device === 'ios') return '🍎 아이폰 — 설정 > 스크린 타임에서 시간을 직접 추가';
+    return '🤖 안드로이드 — Google Family Link 앱에서 시간 추가';
+  }
+  function applyGuideShort(c){
+    if(!c) return '';
+    return c.device === 'ios' ? '🍎 아이폰 직접 추가' : '🤖 패밀리 링크';
+  }
+  function reqStatusLabel(q){
+    return q.status==='done' ? '반영 완료' : q.status==='canceled' ? '취소·환불' : '대기';
   }
   function checksOf(key, id){
     var c = state.checks[key];
@@ -1276,17 +1378,26 @@
     var p = pointsOf(c.id);
     if(kidLocked(c.id)){ toast('먼저 ' + c.name + '의 비밀번호를 넣어 주세요'); return; }
     if(p < r.cost){ toast('포인트가 ' + (r.cost-p) + 'P 더 필요해요'); return; }
+    var time = isTimeReward(r);
+    var pend = time ? pendingCountFor(c.id, r.id) : 0;
+    var guide = '';
+    if(time){
+      guide = '<div class="req-guide">📱 신청하면 부모 모드 <b>보상 신청 내역</b>에 <b>대기</b>로 올라가고, 부모가 시간을 넣고 <b>반영 완료</b>를 누르면 끝나요.<br>' +
+        esc(applyGuide(c)) + (pend ? '<br>지금 반영을 기다리는 ' + pend + '건이 더 있어요.' : '') + '</div>';
+    }
     openSheet(
-      '<h3>' + esc(r.emoji) + ' ' + esc(r.title) + '</h3>' +
+      '<h3>' + esc(r.emoji) + ' ' + esc(r.title) + (time ? ' · ' + r.minutes + '분' : '') + '</h3>' +
       '<div class="sub">' + esc(c.name) + '의 포인트 ' + p + 'P 중 ' + r.cost + 'P를 사용해요.</div>' +
-      '<div class="card" style="background:' + c.soft + ';border:0;margin-bottom:14px">' +
+      '<div class="card" style="background:' + c.soft + ';border:0;margin-bottom:12px">' +
         '<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#4b5563">' +
-          '<span>사용 후 남는 포인트</span><span>' + (p - r.cost) + 'P</span>' +
+          '<span>' + (time ? '사용 포인트' : '사용 후 남는 포인트') + '</span><span>' + (time ? r.cost + 'P' : (p - r.cost) + 'P') + '</span>' +
         '</div>' +
+        (time ? '<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#4b5563;margin-top:5px"><span>사용 후 남는 포인트</span><span>' + (p - r.cost) + 'P</span></div>' : '') +
       '</div>' +
-      '<div class="sheet-actions">' +
+      guide +
+      '<div class="sheet-actions" style="margin-top:12px">' +
         '<button class="btn-ghost" data-act="close-modal">취소</button>' +
-        '<button class="btn-primary" style="background:linear-gradient(135deg,' + c.color + ',' + c.color + 'aa)" data-act="do-redeem" data-id="' + r.id + '">교환하기</button>' +
+        '<button class="btn-primary" style="background:linear-gradient(135deg,' + c.color + ',' + c.color + 'aa)" data-act="do-redeem" data-id="' + r.id + '">' + (time ? '신청하기' : '교환하기') + '</button>' +
       '</div>'
     );
   }
@@ -1297,6 +1408,22 @@
     var cid = ui.kidId;
     if(kidLocked(cid)){ closeModal(); toast('먼저 비밀번호를 넣어 주세요'); return; }
     if(pointsOf(cid) < r.cost){ closeModal(); toast('포인트가 부족해요'); return; }
+    /* 핸드폰 사용시간 보상: 바로 주는 것이 아니라 부모 확인(반영)이 필요한 신청으로 남긴다 */
+    if(isTimeReward(r)){
+      var q = {
+        id: uid(), childId: cid, rewardId: r.id, title: r.title, emoji: r.emoji,
+        minutes: r.minutes, cost: r.cost, ts: Date.now(), date: dateKey(),
+        status: 'pending', doneTs: 0, ledgerId: ''
+      };
+      var e = addEntry(cid, -r.cost, 'redeem', r.emoji + ' ' + r.title + ' ' + r.minutes + '분 신청', {rewardId: r.id, requestId: q.id});
+      q.ledgerId = e.id;
+      state.requests.push(q);
+      state.updatedAt = Date.now();
+      save(); closeModal(); render();
+      chime(true); confetti(22); vibrate([12,40,12]);
+      toast('📱 ' + r.minutes + '분 신청 완료! 부모 확인을 기다려요 (-' + r.cost + 'P)', 'big');
+      return;
+    }
     addEntry(cid, -r.cost, 'redeem', r.emoji + ' ' + r.title, {rewardId: r.id});
     save(); closeModal(); render();
     chime(true); confetti(26); vibrate([12,40,12]);
@@ -1365,6 +1492,13 @@
       btns[i].classList.toggle('on', btns[i].getAttribute('data-view') === ui.view);
     }
     document.getElementById('lockBtn').textContent = ui.parentUnlocked ? '🔓' : '🔒';
+    /* 부모 탭에 반영 대기 중인 핸드폰 시간 신청 수를 표시 */
+    var badge = document.getElementById('parentBadge');
+    if(badge){
+      var pendN = pendingRequests().length;
+      badge.textContent = pendN > 99 ? '99+' : pendN;
+      badge.hidden = !pendN;
+    }
   }
 
   function renderHero(){
@@ -1508,14 +1642,18 @@
     if(!list.length) return '<div class="empty" style="grid-column:1/-1">등록된 보상이 없어요.<br>부모 모드에서 추가해 주세요.</div>';
     return list.map(function(r){
       var enough = p >= r.cost;
-      return '<div class="reward">' +
+      var time = isTimeReward(r);
+      var pend = time ? pendingCountFor(c.id, r.id) : 0;
+      return '<div class="reward" data-reward="' + esc(r.id) + '">' +
         '<div class="remoji">' + esc(r.emoji) + '</div>' +
         '<div class="rtitle">' + esc(r.title) + '</div>' +
         '<div class="rdesc">' + esc(r.desc || '') + '</div>' +
+        (time ? '<div class="rmins">⏱ ' + r.minutes + '분</div>' : '') +
         '<div class="rcost">' + r.cost + 'P</div>' +
         '<button class="rbtn" data-act="redeem" data-id="' + r.id + '"' + (enough?'':' disabled') + '>' +
-          (enough ? '교환하기' : '<span class="short">' + (r.cost - p) + 'P 더 필요해요</span>') +
+          (enough ? (time ? '신청하기' : '교환하기') : '<span class="short">' + (r.cost - p) + 'P 더 필요해요</span>') +
         '</button>' +
+        (pend ? '<div class="rpend">반영 대기 ' + pend + '건</div>' : '') +
       '</div>';
     }).join('');
   }
@@ -1526,8 +1664,32 @@
     document.getElementById('shopPoints').textContent = p + 'P 보유';
     document.getElementById('shopGrid').innerHTML = rewardCards(state.rewards, p, c);
     document.getElementById('shopNote').innerHTML =
-      '<b>' + esc(c.name) + '</b>의 포인트로 교환할 수 있어요. 교환한 보상은 아래 사용 내역에 기록돼요.';
+      '<b>' + esc(c.name) + '</b>의 포인트로 교환할 수 있어요. 📱 핸드폰 시간 보상은 부모님이 확인한 뒤 시간이 늘어나요. 교환한 보상은 아래 사용 내역에 기록돼요.';
+    renderMyRequests(c.id);
     renderRedeemHistory(c.id);
+  }
+
+  /* 아이 화면: 내가 신청한 핸드폰 시간과 처리 상태 */
+  function renderMyRequests(childId){
+    var el = document.getElementById('myRequests');
+    if(!el) return;
+    var list = requestsOf(childId);
+    var pend = list.filter(function(q){ return q.status==='pending'; }).length;
+    var note = document.getElementById('myReqNote');
+    if(note) note.textContent = list.length ? ('대기 ' + pend + ' · 전체 ' + list.length) : '';
+    if(!list.length){
+      el.innerHTML = '<div class="card"><div class="hint" style="text-align:center;padding:6px 0">아직 신청한 시간이 없어요. 상점에서 📱 핸드폰 사용시간을 신청하면 부모님이 확인해 줘요.</div></div>';
+      return;
+    }
+    el.innerHTML = list.slice(0,8).map(function(q){
+      return '<div class="reqrow' + (q.status==='pending' ? ' pending' : '') + '">' +
+        '<div class="req-top"><span class="req-kid">' + esc(q.emoji) + ' ' + esc(q.title) + ' ' + q.minutes + '분</span>' +
+          '<span class="req-state ' + q.status + '">' + reqStatusLabel(q) + '</span></div>' +
+        '<div class="req-meta">사용 ' + q.cost + 'P · 신청 ' + fmtDateTime(q.ts) +
+          (q.status==='done' && q.doneTs ? ' · 반영 ' + fmtDateTime(q.doneTs) : '') + '</div>' +
+        (q.status==='pending' ? '<div class="req-guide">부모님이 확인하고 시간을 넣어 주면 <b>반영 완료</b>로 바뀌어요.</div>' : '') +
+      '</div>';
+    }).join('');
   }
 
   function renderRedeemHistory(childId){
@@ -2201,15 +2363,18 @@
           '<span>' + done + '/' + total + '</span></div>';
       }
       var photos = photosFor(c.id, 7).length;
+      var pendN = pendingRequestsOf(c.id).length;
+      var pendMins = pendingRequestsOf(c.id).reduce(function(n,q){ return n + q.minutes; }, 0);
       return '<div class="dashkid">' +
         '<div class="dk-head">' +
           '<span class="dk-emoji">' + esc(c.emoji) + '</span>' +
           '<span class="dk-name">' + esc(c.name) + '</span>' +
           '<span class="dk-grade">' + esc(c.grade) + '</span>' +
+          (pendN ? gasBadge(pendN) : '') +
           '<span class="dk-pts">' + pointsOf(c.id) + 'P</span>' +
         '</div>' +
         '<div class="dk-days">' + days + '</div>' +
-        '<div class="dk-foot"><span class="pin-meta">📷 7일 인증 ' + photos + '장 · 연속 ' + streakOf(c.id) + '일</span>' +
+        '<div class="dk-foot"><span class="pin-meta">📷 7일 인증 ' + photos + '장 · 연속 ' + streakOf(c.id) + '일' + (pendN ? ' · 📱 신청 ' + pendN + '건(' + pendMins + '분)' : '') + '</span>' +
           '<button class="mini" data-act="goto-kid" data-id="' + c.id + '">페이지 보기</button></div>' +
       '</div>';
     }).join('');
@@ -2221,15 +2386,96 @@
             '<span class="rpname">' + esc(kid(p.kidId).name) + ' · ' + fmtTime(p.photo.ts) + '</span></button>';
         }).join('') + '</div>'
       : '<div class="hint">아직 올라온 인증 사진이 없어요. 아이가 항목 옆 📷 버튼으로 사진을 올리면 여기 모여요.</div>';
+    /* 화면 난이도 순서: 한눈에 보기 → 보상 신청 내역 → 최근 사진 (신청 내역은 panel에서 따로 넣는다) */
+    dashPhotoHtml = '<div class="card pcard" style="margin-top:4px">' +
+      '<div class="sec-head" style="padding:0;margin-bottom:8px"><div class="sec-title">📷 최근 인증 사진</div>' +
+        '<span class="sec-note">' + ph.length + '장</span></div>' + phHtml +
+    '</div>';
     return '<div class="card pcard">' +
       '<div class="sec-head" style="padding:0;margin-bottom:9px"><div class="sec-title">👨‍👩‍👧‍👦 삼 남매 한눈에 보기</div>' +
         '<span class="sec-note">오늘 · 어제 · 그저께</span></div>' +
       '<div class="dash">' + rows + '</div>' +
-    '</div>' +
-    '<div class="card pcard" style="margin-top:4px">' +
-      '<div class="sec-head" style="padding:0;margin-bottom:8px"><div class="sec-title">📷 최근 인증 사진</div>' +
-        '<span class="sec-note">' + ph.length + '장</span></div>' + phHtml +
     '</div>';
+  }
+
+  function photosHTML(){ return dashPhotoHtml || ''; }
+
+  /* ═══════════ 📱 핸드폰 보상 신청 내역 (부모) ═══════════ */
+  function gasBadge(n){ return '<span class="dk-badge">📱 대기 ' + n + '</span>'; }
+
+  function requestsHTML(){
+    var all = (state.requests || []).slice().sort(function(a,b){ return b.ts - a.ts; });
+    var pend = pendingRequests();
+    var head = '<div class="sec-head" style="padding:0;margin-bottom:8px"><div class="sec-title">📱 보상 신청 내역</div>' +
+      '<span class="sec-note">대기 ' + pend.length + ' · 전체 ' + all.length + '</span></div>';
+    /* 아이 기기별 반영 방법: 지호·지윤(안드로이드)=패밀리 링크, 지민(아이폰)=부모가 직접 */
+    var droids = state.children.filter(function(c){ return c.device !== 'ios'; }).map(function(c){ return esc(c.name); });
+    var iphones = state.children.filter(function(c){ return c.device === 'ios'; }).map(function(c){ return esc(c.name); });
+    var pendDroid = pend.filter(function(q){ return kid(q.childId).device !== 'ios'; }).length;
+    var pendIos = pend.length - pendDroid;
+    var sum = '';
+    if(pend.length){
+      sum = '<div class="req-sum">' +
+        (pendDroid ? '<span>🤖 패밀리 링크 반영 ' + pendDroid + '건</span>' : '') +
+        (pendIos ? '<span>🍎 아이폰 직접 추가 ' + pendIos + '건</span>' : '') + '</div>';
+    }
+    var guide = '<div class="hint" style="margin-bottom:10px;line-height:1.7">' +
+      (droids.length ? '• ' + droids.join('·') + '(안드로이드): <b>Google Family Link</b> 앱 → 자녀 선택 → 사용 시간 제한 → 시간 추가<br>' : '') +
+      (iphones.length ? '• ' + iphones.join('·') + '(아이폰): <b>설정 > 스크린 타임</b>에서 시간을 직접 추가<br>' : '') +
+      '• 시간을 넣은 뒤 아래 <b>반영 완료</b>를 누르면 아이 화면에도 표시돼요.</div>';
+    if(!all.length){
+      return head + guide + '<div class="hint" style="text-align:center;padding:6px 0">아직 신청이 없어요. 아이가 상점에서 📱 핸드폰 사용시간을 신청하면 여기에 뜨요.</div>';
+    }
+    var list = pend.concat(all.filter(function(q){ return q.status !== 'pending'; })).slice(0, 15);
+    var rows = list.map(function(q){
+      var c = kid(q.childId);
+      var extra = '';
+      if(q.status === 'done' && q.doneTs) extra = ' · 반영 ' + fmtDateTime(q.doneTs);
+      if(q.status === 'canceled') extra = ' · ' + q.cost + 'P 돌려줌' + (q.doneTs ? ' (' + fmtDateTime(q.doneTs) + ')' : '');
+      return '<div class="reqrow' + (q.status === 'pending' ? ' pending' : '') + '">' +
+        '<div class="req-top"><span class="req-kid">' + esc(c.emoji) + ' ' + esc(c.name) + '</span>' +
+          '<span class="req-state ' + q.status + '">' + reqStatusLabel(q) + '</span></div>' +
+        '<div class="req-title">' + esc(q.emoji) + ' ' + esc(q.title) + ' · <b>' + q.minutes + '분</b></div>' +
+        '<div class="req-meta">사용 ' + q.cost + 'P · 신청 ' + fmtDateTime(q.ts) + extra + '</div>' +
+        (q.status === 'pending' ? '<div class="req-guide">' + esc(applyGuide(c)) + '</div>' +
+          '<div class="req-btns">' +
+            '<button class="mini" data-act="req-done" data-id="' + q.id + '">✅ 반영 완료</button>' +
+            '<button class="mini warn" data-act="req-cancel" data-id="' + q.id + '">취소·환불</button>' +
+          '</div>' : '') +
+      '</div>';
+    }).join('');
+    var more = all.length > list.length ? '<div class="hint" style="text-align:center;padding:6px 0">최근 ' + list.length + '건만 보여요 (전체 ' + all.length + '건)</div>' : '';
+    return head + sum + guide + rows + more;
+  }
+
+  function markRequestDone(id){
+    var q = null;
+    for(var i=0;i<(state.requests||[]).length;i++){ if(state.requests[i].id===id){ q = state.requests[i]; break; } }
+    if(!q) return;
+    if(q.status === 'done'){ toast('이미 반영 완료예요'); return; }
+    if(q.status !== 'pending'){ toast('대기 중인 신청만 반영할 수 있어요'); return; }
+    q.status = 'done';
+    q.doneTs = Date.now();
+    state.updatedAt = Date.now();
+    save(); render();
+    chime(true); confetti(18);
+    toast('✅ ' + kid(q.childId).name + ' · ' + q.minutes + '분 반영 완료로 표시했어요', 'big');
+  }
+
+  function cancelRequest(id){
+    var q = null;
+    for(var i=0;i<(state.requests||[]).length;i++){ if(state.requests[i].id===id){ q = state.requests[i]; break; } }
+    if(!q) return;
+    if(q.status !== 'pending'){ toast('대기 중인 신청만 취소할 수 있어요'); return; }
+    var c = kid(q.childId);
+    confirmAsk('신청을 취소하고 포인트를 돌려줄까요?', esc(c.name) + '의 ' + q.minutes + '분 신청(' + q.cost + 'P)을 취소하고 포인트를 돌려줘요.', '취소·환불', function(){
+      q.status = 'canceled';
+      q.doneTs = Date.now();
+      addEntry(q.childId, q.cost, 'bonus', q.emoji + ' 보상 신청 취소 환불 (' + q.minutes + '분)', {requestId: q.id});
+      state.updatedAt = Date.now();
+      save(); closeModal(); render();
+      toast('↩️ ' + q.cost + 'P를 돌려줬어요');
+    }, true);
   }
 
   /* ═══════════ 부모 모드 ═══════════ */
@@ -2288,7 +2534,7 @@
       return '<div class="prow">' +
         '<div class="remoji" style="font-size:20px;width:28px;text-align:center">' + esc(r.emoji) + '</div>' +
         '<div style="flex:1;min-width:0">' +
-          '<div class="pin-name">' + esc(r.title) + '</div>' +
+          '<div class="pin-name">' + esc(r.title) + (isTimeReward(r) ? '<span class="ttag">📱 ' + r.minutes + '분</span>' : '') + '</div>' +
           '<div class="pin-meta">' + esc([r.cost + 'P', r.desc].filter(Boolean).join(' · ')) + '</div>' +
         '</div>' +
         '<button class="mini" data-act="edit-reward" data-id="' + r.id + '">수정</button>' +
@@ -2300,7 +2546,7 @@
       return '<div class="prow">' +
         '<div style="flex:1;min-width:0">' +
           '<div class="pin-name">' + esc(c.emoji) + ' ' + esc(c.name) + '</div>' +
-          '<div class="pin-meta">' + esc(c.grade) + ' · ' + pointsOf(c.id) + 'P</div>' +
+          '<div class="pin-meta">' + esc(c.grade) + ' · ' + pointsOf(c.id) + 'P · ' + (c.device === 'ios' ? '🍎 아이폰' : '🤖 안드로이드') + '</div>' +
         '</div>' +
         '<button class="mini" data-act="edit-kid" data-id="' + c.id + '">수정</button>' +
       '</div>';
@@ -2308,6 +2554,8 @@
 
     panel.innerHTML =
       '<div class="section" style="margin-top:14px">' + dashHTML() + '</div>' +
+      '<div class="card pcard">' + requestsHTML() + '</div>' +
+      photosHTML() +
       '<div class="section"><div class="card pcard">' +
         '<div class="sec-head" style="padding:0;margin-bottom:8px"><div class="sec-title">📋 오늘의 계획 관리</div>' +
           '<button class="mini" data-act="lock-parent">잠금</button></div>' +
@@ -2418,6 +2666,7 @@
           '• 아이 탭을 눌러 아이를 고르고, 오늘의 계획을 눌러 체크하면 포인트가 바로 쌓여요.<br>' +
           '• 자정이 지나면 오늘 체크는 새로 시작되고, 누적 포인트와 최근 7일 기록은 그대로 남아요.<br>' +
           '• 상점에서 포인트를 써서 보상을 교환할 수 있어요.<br>' +
+          '• 📱 <b>핸드폰 사용시간</b> 보상은 시간(분)과 포인트를 정해 두면, 아이가 신청할 때 <b>보상 신청 내역</b>에 대기로 뜽요. 지호·지윤은 패밀리 링크, 지민은 아이폰 스크린 타임에서 시간을 넣고 <b>반영 완료</b>를 누르세요.<br>' +
           '• <b>아이폰에서 앱처럼 쓰기</b>: 사파리로 열고 → 공유 버튼 → ‘홈 화면에 추가’.<br>' +
           '• 처음 부모 모드 PIN은 <b>0000</b>이고 이 화면에서 바꿀 수 있어요.<br>' +
           '• 기록 탭에서 <b>일별·주간·월간</b> 진행도를 넘겨 볼 수 있어요. 월간 달력의 날짜를 누르면 그날 완료한 항목이 보여요.<br>' +
@@ -2529,18 +2778,25 @@
 
   function rewardForm(reward){
     var isNew = !reward;
-    reward = reward || {title:'', cost:20, emoji:'🎁', desc:''};
+    reward = reward || {title:'', cost:20, emoji:'🎁', desc:'', minutes:0};
+    var mins = parseInt(reward.minutes,10) || 0;
     openSheet(
       '<h3>' + (isNew ? '새 보상 추가' : '보상 수정') + '</h3>' +
       '<div class="sub">아이가 포인트로 교환할 보상을 정해 주세요.</div>' +
       '<div class="fieldrow">' +
         '<label class="field" style="flex:0 0 90px"><span>이모지</span><input id="f-r-emoji" type="text" maxlength="4" value="' + esc(reward.emoji) + '"></label>' +
-        '<label class="field"><span>보상 이름</span><input id="f-r-title" type="text" maxlength="24" placeholder="예: 자유시간 30분" value="' + esc(reward.title) + '"></label>' +
+        '<label class="field"><span>보상 이름</span><input id="f-r-title" type="text" maxlength="24" placeholder="예: 핸드폰 사용시간 추가" value="' + esc(reward.title) + '"></label>' +
       '</div>' +
       '<div class="fieldrow">' +
-        '<label class="field"><span>필요 포인트</span><input id="f-r-cost" type="number" inputmode="numeric" min="1" max="9999" value="' + reward.cost + '"></label>' +
-        '<label class="field"><span>한 줄 설명</span><input id="f-r-desc" type="text" maxlength="24" placeholder="예: 하고 싶은 거" value="' + esc(reward.desc || '') + '"></label>' +
+        '<label class="field"><span>시간 (분)</span><input id="f-r-minutes" type="number" inputmode="numeric" min="0" max="600" step="5" value="' + mins + '"></label>' +
+        '<label class="field"><span>필요 포인트 (P)</span><input id="f-r-cost" type="number" inputmode="numeric" min="1" max="9999" value="' + reward.cost + '"></label>' +
       '</div>' +
+      '<div class="chipline" id="f-r-presets" aria-label="시간 빠른 선택">' +
+        [10,20,30,60].map(function(m){ return '<button type="button" class="chip' + (mins===m?' on':'') + '" data-act="r-preset" data-min="' + m + '">' + m + '분</button>'; }).join('') +
+        '<button type="button" class="chip' + (!mins?' on':'') + '" data-act="r-preset" data-min="0">시간 없음</button>' +
+      '</div>' +
+      '<div class="hint" style="margin-bottom:10px">시간을 적으면 <b>핸드폰 사용시간 보상</b>이 돼요. 아이가 신청하면 부모 모드 <b>보상 신청 내역</b>에 대기로 뜨고, 부모가 시간을 넣고 <b>반영 완료</b>를 누르면 끝나요. (0으로 두면 바로 교환되는 보상)</div>' +
+      '<label class="field"><span>한 줄 설명</span><input id="f-r-desc" type="text" maxlength="24" placeholder="예: 부모 확인 후 시간이 늘어나요" value="' + esc(reward.desc || '') + '"></label>' +
       '<div class="sheet-actions">' +
         '<button class="btn-ghost" data-act="close-modal">취소</button>' +
         '<button class="btn-primary" data-act="save-reward" data-id="' + (isNew ? '' : reward.id) + '">' + (isNew ? '추가하기' : '저장') + '</button>' +
@@ -2552,15 +2808,17 @@
     var title = (document.getElementById('f-r-title').value || '').trim();
     if(!title){ toast('보상 이름을 적어 주세요'); return; }
     var cost = clamp(parseInt(document.getElementById('f-r-cost').value,10) || 1, 1, 9999);
+    var minutes = clamp(parseInt(document.getElementById('f-r-minutes').value,10) || 0, 0, 600);
     var emoji = (document.getElementById('f-r-emoji').value || '🎁').trim() || '🎁';
     var desc = (document.getElementById('f-r-desc').value || '').trim();
     if(id){
-      state.rewards.forEach(function(r){ if(r.id===id){ r.title=title; r.cost=cost; r.emoji=emoji; r.desc=desc; } });
-      toast('보상을 수정했어요');
+      state.rewards.forEach(function(r){ if(r.id===id){ r.title=title; r.cost=cost; r.emoji=emoji; r.desc=desc; r.minutes=minutes; } });
+      toast(minutes ? ('보상을 수정했어요 · ' + minutes + '분 / ' + cost + 'P') : '보상을 수정했어요');
     } else {
-      state.rewards.push({id:uid(), title:title, cost:cost, emoji:emoji, desc:desc});
-      toast('보상을 추가했어요');
+      state.rewards.push({id:uid(), title:title, cost:cost, emoji:emoji, desc:desc, minutes:minutes});
+      toast(minutes ? ('시간 보상을 추가했어요 · ' + minutes + '분 / ' + cost + 'P') : '보상을 추가했어요');
     }
+    state.settings.phoneSeeded = true;
     save(); closeModal(); render();
   }
 
@@ -2573,6 +2831,10 @@
         '<label class="field"><span>이름</span><input id="f-k-name" type="text" maxlength="10" value="' + esc(c.name) + '"></label>' +
       '</div>' +
       '<label class="field"><span>학년 (선택)</span><input id="f-k-grade" type="text" maxlength="10" value="' + esc(c.grade) + '"></label>' +
+      '<label class="field"><span>기기 (핸드폰 시간 반영 방법 안내에 써요)</span><select id="f-k-device">' +
+        '<option value="android"' + (c.device !== 'ios' ? ' selected' : '') + '>🤖 안드로이드 (Google Family Link)</option>' +
+        '<option value="ios"' + (c.device === 'ios' ? ' selected' : '') + '>🍎 아이폰 (스크린 타임 직접 추가)</option>' +
+      '</select></label>' +
       '<div class="sheet-actions">' +
         '<button class="btn-ghost" data-act="close-modal">취소</button>' +
         '<button class="btn-primary" data-act="save-kid" data-id="' + c.id + '">저장</button>' +
@@ -2787,6 +3049,18 @@
       case 'do-redeem':
         doRedeem(id);
         break;
+      case 'req-done':
+        markRequestDone(id);
+        break;
+      case 'req-cancel':
+        cancelRequest(id);
+        break;
+      case 'r-preset':
+        var minEl = document.getElementById('f-r-minutes');
+        if(minEl) minEl.value = el.getAttribute('data-min');
+        var pchips = document.querySelectorAll('#f-r-presets .chip');
+        for(var pi=0; pi<pchips.length; pi++) pchips[pi].classList.toggle('on', pchips[pi] === el);
+        break;
       case 'close-modal':
         closeModal();
         break;
@@ -2845,7 +3119,7 @@
         saveReward(id || '');
         break;
       case 'del-reward':
-        confirmAsk('보상을 삭제할까요?', '이미 교환한 기록은 그대로 남아요.', '삭제', function(){
+        confirmAsk('보상을 삭제할까요?', '이미 교환·신청한 기록은 그대로 남아요.', '삭제', function(){
           state.rewards = state.rewards.filter(function(x){ return x.id!==id; });
           save(); closeModal(); render(); toast('삭제했어요');
         }, true);
@@ -2862,6 +3136,8 @@
             x.name = name;
             x.emoji = (document.getElementById('f-k-emoji').value || '🙂').trim() || '🙂';
             x.grade = (document.getElementById('f-k-grade').value || '').trim();
+            var dv = document.getElementById('f-k-device');
+            if(dv) x.device = (dv.value === 'ios') ? 'ios' : 'android';
           }
         });
         save(); closeModal(); render(); toast('아이 정보를 저장했어요');
