@@ -1,4 +1,9 @@
 <!DOCTYPE html>
+<!-- 삼남매 포인트 플래너 v9 (2026-11-26)
+     · 기록 > 일별: 날짜별 매일의 포인트 내역 — 헤더에 +적립 / -차감 / 순합계, 아래에 할 일 적립과 보상 차감(대기·반영 완료·취소·환불)을 시간순으로
+     · 기록 > 주간·월간 날짜 상세: 그날의 보상 신청·차감 내역과 적립/차감/순합계
+     · 상단 부모 모드 버튼·부모 탭: 대기 중인 보상 신청 건수 배지(빨간 숫자) + 상단 대기 알림 띠 (60초마다 조용히 새 신청 확인)
+     ※ 이 파일 하나가 앱 전체입니다. 외부 빌드 없이 GitHub Pages로 배포합니다. -->
 <html lang="ko">
 <head>
 <meta charset="utf-8">
@@ -71,9 +76,28 @@
   .brand .today{font-size:12px;color:var(--ink-3);font-weight:600;margin-top:1px}
   .lock-btn{
     width:42px;height:42px;border-radius:14px;background:#fff;box-shadow:var(--shadow-sm);
-    display:grid;place-items:center;font-size:18px;flex:none;
+    display:grid;place-items:center;font-size:18px;flex:none;position:relative;
   }
   .lock-btn:active{transform:scale(.95)}
+  /* v9: 상단 부모 모드 버튼의 대기 알림 배지 */
+  .topbadge{
+    position:absolute;top:-4px;right:-4px;min-width:19px;height:19px;border-radius:10px;
+    background:#ef4444;color:#fff;font-size:10.5px;font-weight:900;line-height:1;
+    display:grid;place-items:center;padding:0 4px;border:2px solid #fff;
+    box-shadow:0 2px 7px rgba(239,68,68,.38);animation:bpulse 1.8s ease-in-out infinite;
+  }
+  @keyframes bpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+  /* v9: 앱을 열자마자 보이는 상단 대기 알림 띠 */
+  .pendbar{margin:6px 0 0}
+  .pendbtn{
+    width:100%;display:flex;align-items:center;gap:7px;text-align:left;
+    background:linear-gradient(135deg,#fef2f2,#fff7ed);border:1px solid #fecdd3;border-radius:14px;
+    padding:9px 11px;box-shadow:0 2px 8px rgba(239,68,68,.10);
+  }
+  .pendbtn:active{transform:scale(.99)}
+  .pendbtn .pbe{font-size:15px;line-height:1;flex:none}
+  .pendbtn .pbt{flex:1;min-width:0;font-size:12.5px;font-weight:800;color:#b91c1c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pendbtn .pbc{flex:none;font-size:11.5px;font-weight:800;color:#fff;background:#ef4444;border-radius:9px;padding:4px 8px;white-space:nowrap}
 
   .kidtabs{display:flex;gap:6px;padding:10px 0 10px;overflow-x:auto;scrollbar-width:none}
   .kidtabs::-webkit-scrollbar{display:none}
@@ -230,7 +254,7 @@
   .req-sum{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px}
   .req-sum span{font-size:11px;font-weight:800;border-radius:9px;padding:5px 8px;background:#f6f9fe;color:var(--ink-2)}
   .dk-badge{font-size:10px;font-weight:800;color:#92620a;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:1px 5px;margin-left:3px;white-space:nowrap}
-  .navbadge{position:absolute;top:5px;left:calc(50% + 9px);min-width:16px;height:16px;border-radius:8px;background:#f59e0b;color:#fff;font-size:10px;font-weight:900;display:grid;place-items:center;padding:0 4px;line-height:1}
+  .navbadge{position:absolute;top:5px;left:calc(50% + 9px);min-width:16px;height:16px;border-radius:8px;background:#ef4444;color:#fff;font-size:10px;font-weight:900;display:grid;place-items:center;padding:0 4px;line-height:1}
 
   /* ── 기록 ── */
   .chart{display:flex;align-items:flex-end;gap:7px;height:132px;padding:8px 2px 0}
@@ -252,6 +276,35 @@
   .histmeta{font-size:11.5px;color:var(--ink-3);font-weight:600}
   .histamt{font-size:14px;font-weight:900;flex:none}
   .histamt.plus{color:#16a34a}.histamt.minus{color:#dc2626}
+
+  /* ── v9: 매일의 포인트 내역 (날짜별 적립 · 차감 · 순합계) ── */
+  .pday{border-bottom:1px dashed #e9eef7;padding-bottom:4px}
+  .pday:last-child{border-bottom:0;padding-bottom:0}
+  .pdayhead{
+    display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+    background:#fbfcfe;border:1px solid #eef3fb;border-radius:12px;padding:7px 9px;margin:8px 0 2px;
+  }
+  .pday:first-child .pdayhead{margin-top:2px}
+  .pdaydate{display:flex;align-items:baseline;gap:5px;min-width:0}
+  .pdaydate b{font-size:13.5px;font-weight:900;letter-spacing:-.02em}
+  .pdaydate span{font-size:11px;font-weight:700;color:var(--ink-3)}
+  .pdaydate em{font-style:normal;font-size:10px;font-weight:800;color:#fff;background:var(--c);border-radius:7px;padding:1px 5px}
+  .pdaysum{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+  .pdaysum span{font-size:10.5px;font-weight:800;border-radius:8px;padding:3px 6px;white-space:nowrap}
+  .pdaysum .pep{background:#e8f7ee;color:#15803d}
+  .pdaysum .psp{background:#fdeeee;color:#dc2626}
+  .pdaysum .psp.zero{background:#f4f6fa;color:#b6bdc8}
+  .pdaysum .pnet{background:#eef4ff;color:#2f6bf0}
+  .pdaysum .pnet.plus{background:#e8f7ee;color:#15803d}
+  .pdaysum .pnet.minus{background:#fdeeee;color:#dc2626}
+  .pdaysum .pnet.zero{background:#f4f6fa;color:#6b7280}
+  .stchip{display:inline-block;font-size:10px;font-weight:800;border-radius:7px;padding:1px 5px;background:#f4f6fa;color:var(--ink-3);vertical-align:1px}
+  .stchip.pending{background:#fffbeb;color:#92620a;border:1px solid #fde68a}
+  .stchip.done{background:#eefaf3;color:#15803d;border:1px solid #bbf7d0}
+  .stchip.canceled{background:#f4f6fa;color:#94a3b8}
+  /* 7일 막대그래프 아래 그날 사용(차감) 표시 */
+  .bspend{width:100%;height:13px;font-size:9.5px;font-weight:800;color:transparent;text-align:center;line-height:1.2;letter-spacing:-.03em}
+  .bspend.on{color:#dc2626}
 
   /* ── 부모 모드 ── */
   .gate{text-align:center;padding:26px 18px 22px}
@@ -324,6 +377,7 @@
   .wpct.full{color:var(--c)}
   .wday{font-size:11px;font-weight:700;color:var(--ink-3);text-align:center;line-height:1.25}
   .wday.today{color:var(--c)}
+  .wspend{font-size:9.5px;font-weight:800;color:#dc2626;line-height:1.1;white-space:nowrap}
   .monwd{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:2px 0 5px}
   .monwd span{text-align:center;font-size:11px;font-weight:800;color:var(--ink-3)}
   .mongrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
@@ -337,6 +391,7 @@
   .mcell.today{border-color:var(--c)}
   .mcell.sel{outline:2.5px solid var(--c);outline-offset:1.5px}
   .mcell .mpct{font-size:9.5px;font-weight:800;opacity:.92;line-height:1.1}
+  .mcell .mpct.sp{color:#dc2626;opacity:1}
   .mcell .mstar{font-size:10px;line-height:1.1}
   .monlegend{display:flex;gap:10px;justify-content:center;margin-top:10px;font-size:11px;font-weight:700;color:var(--ink-3);flex-wrap:wrap}
   .monlegend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:3px;vertical-align:-1px}
@@ -349,6 +404,12 @@
   .ddstat{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
   .ddchip{font-size:11.5px;font-weight:800;padding:5px 9px;border-radius:9px;background:var(--soft);color:var(--c)}
   .ddchip.gold{background:#fff5e5;color:#b45309}
+  .ddchip.minus{background:#fdeeee;color:#dc2626}
+  .ddchip.plain{background:#f4f6fa;color:var(--ink-2)}
+  .ddchip.net{background:#eef4ff;color:#2f6bf0}
+  .ddchip.net.minus{background:#fdeeee;color:#dc2626}
+  .ddsub{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;font-size:12.5px;font-weight:800;color:var(--ink-2);margin:12px 0 2px;padding-top:9px;border-top:1px solid var(--line)}
+  .ddsub span{font-size:11px;font-weight:700;color:var(--ink-3)}
   .dditem{display:flex;align-items:center;gap:9px;padding:9px 2px;border-bottom:1px solid var(--line);font-size:13.5px;font-weight:700;word-break:keep-all}
   .dditem:last-child{border-bottom:0}
   .dditem .dcheck{width:22px;height:22px;border-radius:8px;background:var(--c);color:#fff;display:grid;place-items:center;font-size:11.5px;flex:none}
@@ -476,7 +537,14 @@
           <div class="today" id="todayLabel">오늘</div>
         </div>
       </div>
-      <button class="lock-btn" id="lockBtn" data-act="nav" data-view="parent" aria-label="부모 관리 모드 열기">🔒</button>
+      <button class="lock-btn" id="lockBtn" data-act="nav" data-view="parent" aria-label="부모 관리 모드 열기"><span id="lockIco">🔒</span><span class="topbadge" id="lockBadge" hidden>0</span></button>
+    </div>
+    <div class="pendbar" id="pendBar" hidden>
+      <button class="pendbtn" data-act="nav" data-view="parent" aria-label="대기 중인 보상 신청 확인하기">
+        <span class="pbe">📱</span>
+        <span class="pbt" id="pendBarText">보상 신청 대기</span>
+        <span class="pbc">확인</span>
+      </button>
     </div>
     <div class="kidtabs" id="kidTabs" role="tablist" aria-label="아이 선택"></div>
   </div>
@@ -551,6 +619,7 @@
           </div>
           <div class="card">
             <div class="chart" id="chart"></div>
+            <div class="hint" style="text-align:center;margin-top:2px">막대 = 그날 적립 · 빨간 숫자 = 그날 사용(차감)</div>
           </div>
           <div class="streakcard">
             <div class="stat"><b id="hWeekEarn">0P</b><span>7일 획득</span></div>
@@ -558,7 +627,7 @@
             <div class="stat"><b id="hWeekDone">0개</b><span>7일 완료</span></div>
           </div>
           <div class="section">
-            <div class="sec-head"><div class="sec-title">🗂 포인트 내역</div></div>
+            <div class="sec-head"><div class="sec-title">🗂 매일의 포인트 내역</div><div class="sec-note" id="ledgerNote"></div></div>
             <div class="card" id="ledgerList"></div>
           </div>
         </div>
@@ -581,8 +650,7 @@
         </div>
 
         <div id="paneMonth" hidden>
-          <div class="prog-nav">
-            <button class="pnav" id="monthPrev" data-act="month-move" data-dir="-1" aria-label="이전 달">‹</button>
+          <div class="prog-nav">            <button class="pnav" id="monthPrev" data-act="month-move" data-dir="-1" aria-label="이전 달">‹</button>
             <div class="pnavlabel"><b id="monthLabel">-</b><span id="monthNote">이번 달</span></div>
             <button class="pnav" id="monthNext" data-act="month-move" data-dir="1" aria-label="다음 달">›</button>
           </div>
@@ -935,6 +1003,7 @@
      스냅샷은 “그날 마감한 기록”이다. 지난 날짜의 것은 한 번 만들면 다시 계산하지 않는다.
      아직 없는 지난 날짜는 남아 있는 체크·포인트 기록에서 한 번만 만들어 두는다(예전 v1/v2 데이터). */
   var SNAP_KEEP_DAYS = 400;
+  var LEDGER_DAYS = 14;        /* v9: 일별 포인트 내역에서 보여 줄 최근 날짜 수 */
   function normalizeSnapshots(s){
     var out = {};
     var todayK = dateKey();
@@ -1083,6 +1152,76 @@
   }
   function pointsOf(id){
     return state.ledger.reduce(function(s,e){ return e.childId===id ? s+e.amount : s; }, 0);
+  }
+  /* ═══════════ v9: 하루치 포인트 내역 (적립 · 차감 · 순변동) ═══════════ */
+  function findRequest(id){
+    if(!id) return null;
+    for(var i=0;i<(state.requests||[]).length;i++){ if(state.requests[i].id===id) return state.requests[i]; }
+    return null;
+  }
+  /* 그날 그 아이의 포인트 기록 (시간순) */
+  function ledgerOf(dayKey, childId){
+    return state.ledger.filter(function(e){ return e && e.childId===childId && e.date===dayKey; })
+      .sort(function(a,b){ return (a.ts||0)-(b.ts||0); });
+  }
+  /* 그날의 적립·차감·순변동 합계 */
+  function dayLedger(dayKey, childId){
+    var list = ledgerOf(dayKey, childId), earn = 0, spend = 0;
+    list.forEach(function(e){ if(e.amount > 0) earn += e.amount; else spend += -e.amount; });
+    return {entries:list, earn:earn, spend:spend, net:earn-spend};
+  }
+  /* 보상 신청·교환으로 차감된 항목의 상태 (대기 / 반영 완료 / 취소·환불 / 교환 완료) */
+  function entryState(e){
+    if(!e) return null;
+    if(e.type === 'redeem'){
+      var q = findRequest(e.requestId);
+      if(q) return {label: reqStatusLabel(q), cls: q.status};
+      return {label: '교환 완료', cls: 'done'};
+    }
+    if(e.type === 'bonus' && e.requestId) return {label: '환불', cls: 'done'};
+    return null;
+  }
+  function entryKind(e){
+    if(e.type === 'earn') return '할 일 적립';
+    if(e.type === 'redeem') return (findRequest(e.requestId) ? '보상 신청' : '보상 교환');
+    if(e.type === 'bonus') return (e.requestId ? '신청 취소 환불' : '보너스');
+    return '차감';
+  }
+  function entryTitle(e){
+    return esc(e.memo || (e.type==='earn'?'계획 완료':e.type==='redeem'?'보상 교환':e.type==='bonus'?'보너스':'차감'));
+  }
+  /* 포인트 내역 한 줄 — 일별 목록·날짜 상세·사용 내역에서 함께 쓴다 */
+  function entryRowHTML(e, withDate){
+    var iconMap = {earn:'✅', redeem:'🎁', bonus:'⭐', penalty:'➖'};
+    var ic = (e.type==='bonus' && e.requestId) ? '↩️' : (iconMap[e.type] || '•');
+    var st = entryState(e);
+    var cls = e.amount >= 0 ? 'plus' : 'minus';
+    return '<div class="histrow" data-type="' + esc(e.type) + '">' +
+      '<div class="histicon ' + esc(e.type) + '">' + ic + '</div>' +
+      '<div class="histmain"><div class="histtitle">' + entryTitle(e) + '</div>' +
+        '<div class="histmeta">' + esc(entryKind(e)) + ' · ' + (withDate ? fmtDate(e.date) + ' ' : '') + fmtTime(e.ts) +
+          (st ? ' <span class="stchip ' + esc(st.cls) + '">' + esc(st.label) + '</span>' : '') + '</div></div>' +
+      '<div class="histamt ' + cls + '">' + (e.amount>0?'+':'') + e.amount + 'P</div>' +
+    '</div>';
+  }
+  /* 날짜 한 칸: 헤더에 +적립 / -차감 / 순합계, 아래에 그날 기록을 시간순으로 */
+  function dayGroupHTML(dayKey, childId){
+    var dl = dayLedger(dayKey, childId);
+    var d = parseDayKey(dayKey) || new Date();
+    var netCls = dl.net > 0 ? ' plus' : (dl.net < 0 ? ' minus' : ' zero');
+    return '<div class="pday" data-day="' + esc(dayKey) + '">' +
+      '<div class="pdayhead">' +
+        '<div class="pdaydate"><b>' + fmtDate(dayKey) + '</b><span>' + WD[d.getDay()] + '요일</span>' +
+          (dayKey === dateKey() ? '<em>오늘</em>' : '') + '</div>' +
+        '<div class="pdaysum">' +
+          '<span class="pep">+' + dl.earn + 'P 적립</span>' +
+          '<span class="psp' + (dl.spend ? '' : ' zero') + '">' + (dl.spend ? '-' + dl.spend + 'P' : '0P') + ' 차감</span>' +
+          '<span class="pnet' + netCls + '">순합계 ' + (dl.net > 0 ? '+' : '') + dl.net + 'P</span>' +
+        '</div>' +
+      '</div>' +
+      (dl.entries.length ? dl.entries.map(function(e){ return entryRowHTML(e); }).join('')
+                         : '<div class="hint" style="padding:4px 2px 2px">이 날은 포인트 기록이 없어요.</div>') +
+    '</div>';
   }
   /* ═══════════ 핸드폰 사용시간 보상 ═══════════ */
   function isTimeReward(r){ return !!r && (parseInt(r.minutes,10) || 0) > 0; }
@@ -1249,7 +1388,7 @@
       });
       var dn = doneCount(k, id);
       earn += e; spend += s; done += dn;
-      out.push({key:k, date:d, label:WD[d.getDay()], earn:e, done:dn, total:tasksFor(id).length, today:i===0});
+      out.push({key:k, date:d, label:WD[d.getDay()], earn:e, spend:s, net:e-s, done:dn, total:tasksFor(id).length, today:i===0});
     }
     return {days:out, earn:earn, spend:spend, done:done};
   }
@@ -1574,14 +1713,40 @@
     for(var i=0;i<btns.length;i++){
       btns[i].classList.toggle('on', btns[i].getAttribute('data-view') === ui.view);
     }
-    document.getElementById('lockBtn').textContent = ui.parentUnlocked ? '🔓' : '🔒';
-    /* 부모 탭에 반영 대기 중인 핸드폰 시간 신청 수를 표시 */
+    var lockIco = document.getElementById('lockIco');
+    if(lockIco) lockIco.textContent = ui.parentUnlocked ? '🔓' : '🔒';
+    /* 부모 모드·상단 바에 반영 대기 중인 보상(핸드폰 시간) 신청 수를 표시 */
+    var pendN = pendingRequests().length;
     var badge = document.getElementById('parentBadge');
     if(badge){
-      var pendN = pendingRequests().length;
       badge.textContent = pendN > 99 ? '99+' : pendN;
       badge.hidden = !pendN;
     }
+    var tb = document.getElementById('lockBadge');
+    if(tb){
+      tb.textContent = pendN > 99 ? '99+' : pendN;
+      tb.hidden = !pendN;
+    }
+    var lb = document.getElementById('lockBtn');
+    if(lb) lb.setAttribute('aria-label', pendN ? '부모 관리 모드 열기 · 대기 중인 보상 신청 ' + pendN + '건' : '부모 관리 모드 열기');
+    /* 앱을 열자마자 눈에 띄는 상단 대기 알림 (부모 모드 안에서는 숨김) */
+    var bar = document.getElementById('pendBar');
+    if(bar){
+      bar.hidden = !pendN || ui.parentUnlocked || ui.view === 'parent';
+      var txt = document.getElementById('pendBarText');
+      if(txt) txt.textContent = pendingBarText();
+    }
+  }
+
+  /* 상단 대기 알림 문구: 한 건이면 아이·보상·분까지, 여러 건이면 인원과 합계 분 */
+  function pendingBarText(){
+    var p = pendingRequests();
+    if(!p.length) return '보상 신청 대기';
+    var names = [];
+    p.forEach(function(q){ var n = kid(q.childId).name; if(names.indexOf(n) < 0) names.push(n); });
+    if(p.length === 1) return names[0] + ' · ' + p[0].title + ' ' + p[0].minutes + '분 신청이 대기 중이에요';
+    var mins = p.reduce(function(n,q){ return n + q.minutes; }, 0);
+    return names.join('·') + ' · 보상 신청 ' + p.length + '건(' + mins + '분) 대기 중이에요';
   }
 
   function renderHero(){
@@ -1789,14 +1954,7 @@
       .sort(function(a,b){ return b.ts-a.ts; }).slice(0,10);
     var el = document.getElementById('redeemHistory');
     if(!rows.length){ el.innerHTML = '<div class="hint" style="text-align:center;padding:10px 0">아직 사용한 보상이 없어요. 포인트를 모아 첫 보상을 바꿔 보세요!</div>'; return; }
-    el.innerHTML = rows.map(function(e){
-      return '<div class="histrow">' +
-        '<div class="histicon redeem">🎁</div>' +
-        '<div class="histmain"><div class="histtitle">' + esc(e.memo) + '</div>' +
-        '<div class="histmeta">' + fmtDate(e.date) + ' ' + pad(new Date(e.ts).getHours()) + ':' + pad(new Date(e.ts).getMinutes()) + '</div></div>' +
-        '<div class="histamt minus">' + e.amount + 'P</div>' +
-      '</div>';
-    }).join('');
+    el.innerHTML = rows.map(function(e){ return entryRowHTML(e, true); }).join('');
   }
 
   function renderHistory(){
@@ -1805,11 +1963,13 @@
     renderProgress(c);
     var max = Math.max.apply(null, w.days.map(function(d){ return d.earn; }).concat([10]));
     document.getElementById('chart').innerHTML = w.days.map(function(d){
-      var h = Math.max(4, Math.round(d.earn / max * 104));
-      return '<div class="barcol">' +
+      var h = Math.max(4, Math.round(d.earn / max * 92));
+      return '<div class="barcol" data-day="' + d.key + '">' +
         '<div class="bar' + (d.earn>0?' on':'') + '" style="height:' + h + 'px">' +
           (d.earn>0 ? '<span class="bval">' + d.earn + '</span>' : '') +
         '</div>' +
+        '<div class="bspend' + (d.spend ? ' on' : '') + '"' + (d.spend ? ' aria-label="' + d.spend + 'P 사용"' : '') + '>' +
+          (d.spend ? '-' + d.spend : '') + '</div>' +
         '<div class="barlabel' + (d.today?' today':'') + '">' + d.label + '</div>' +
       '</div>';
     }).join('');
@@ -1817,23 +1977,29 @@
     document.getElementById('hWeekEarn').textContent = w.earn + 'P';
     document.getElementById('hWeekSpend').textContent = w.spend + 'P';
     document.getElementById('hWeekDone').textContent = w.done + '개';
+    renderLedgerDaily(c);
+  }
 
-    var rows = state.ledger.filter(function(e){ return e.childId===c.id; })
-      .sort(function(a,b){ return b.ts-a.ts; }).slice(0,30);
+  /* 🗂 매일의 포인트 내역: 최근 내역을 날짜별로 묶어 헤더에 적립·차감·순합계, 아래에 시간순 기록 */
+  function renderLedgerDaily(c){
     var el = document.getElementById('ledgerList');
-    if(!rows.length){ el.innerHTML = '<div class="hint" style="text-align:center;padding:10px 0">아직 기록이 없어요. 오늘의 계획을 체크하면 여기에 쌓여요.</div>'; return; }
-    var iconMap = {earn:'✅', redeem:'🎁', bonus:'⭐', penalty:'➖'};
-    el.innerHTML = rows.map(function(e){
-      var cls = e.amount >= 0 ? 'plus' : 'minus';
-      return '<div class="histrow">' +
-        '<div class="histicon ' + esc(e.type) + '">' + (iconMap[e.type] || '•') + '</div>' +
-        '<div class="histmain">' +
-          '<div class="histtitle">' + esc(e.memo || (e.type==='earn'?'계획 완료':e.type==='redeem'?'보상 교환':e.type==='bonus'?'보너스':'차감')) + '</div>' +
-          '<div class="histmeta">' + fmtDate(e.date) + ' ' + fmtDateTime(e.ts).split(' ')[1] + '</div>' +
-        '</div>' +
-        '<div class="histamt ' + cls + '">' + (e.amount>0?'+':'') + e.amount + 'P</div>' +
-      '</div>';
-    }).join('');
+    if(!el) return;
+    var keys = [];
+    state.ledger.forEach(function(e){
+      if(!e || e.childId !== c.id || !e.date || typeof e.amount !== 'number') return;
+      if(keys.indexOf(e.date) < 0) keys.push(e.date);
+    });
+    keys.sort(function(a,b){ return a < b ? 1 : (a > b ? -1 : 0); });   /* 최근 날짜 먼저 */
+    var shown = keys.slice(0, LEDGER_DAYS);
+    setText('ledgerNote', shown.length ? ('최근 ' + shown.length + '일 · ' + c.name) : c.name);
+    if(!shown.length){
+      el.innerHTML = '<div class="hint" style="text-align:center;padding:10px 0">아직 기록이 없어요. 오늘의 계획을 체크하면 날짜별로 여기에 쌓여요.</div>';
+      return;
+    }
+    el.innerHTML = shown.map(function(k){ return dayGroupHTML(k, c.id); }).join('') +
+      (keys.length > shown.length
+        ? '<div class="hint" style="text-align:center;padding:8px 0 0">더 이전 내역은 주간·월간에서 날짜를 눌러 볼 수 있어요 (전체 ' + keys.length + '일)</div>'
+        : '');
   }
 
   /* ═══════════ 진행도 (일별 · 주간 · 월간) ═══════════ */
@@ -1841,30 +2007,34 @@
 
   function weekRecords(childId, offset){
     var ws = weekStartOf(addDays(new Date(), (offset||0)*7));
-    var days = [], done = 0, pts = 0, pctSum = 0, pctN = 0, perfect = 0;
+    var days = [], done = 0, pts = 0, spend = 0, pctSum = 0, pctN = 0, perfect = 0;
     var todayK = dateKey();
     for(var i=0;i<7;i++){
       var d = addDays(ws, i), k = dateKey(d);
       var r = recordOf(k, childId);
-      days.push({key:k, date:d, label:WD[d.getDay()], rec:r, future:k > todayK});
+      var dl = dayLedger(k, childId);
+      days.push({key:k, date:d, label:WD[d.getDay()], rec:r, earn:dl.earn, spend:dl.spend, net:dl.net, future:k > todayK});
       if(r){ done += r.done; pts += r.points; pctSum += r.pct; pctN++; if(r.pct >= 100) perfect++; }
+      spend += dl.spend;
     }
-    return {start:ws, end:addDays(ws,6), days:days, done:done, points:pts,
+    return {start:ws, end:addDays(ws,6), days:days, done:done, points:pts, spend:spend,
             avg: pctN ? Math.round(pctSum/pctN) : 0, pctN:pctN, perfect:perfect};
   }
 
   function monthRecords(childId, y, m){
     var n = daysInMonth(y,m);
     var lead = new Date(y,m,1).getDay();
-    var cells = [], done = 0, pts = 0, pctSum = 0, pctN = 0, perfect = 0;
+    var cells = [], done = 0, pts = 0, spend = 0, pctSum = 0, pctN = 0, perfect = 0;
     var todayK = dateKey();
     for(var i=1;i<=n;i++){
       var d = new Date(y,m,i), k = dateKey(d);
       var r = recordOf(k, childId);
-      cells.push({key:k, date:d, rec:r, future:k > todayK});
+      var dl = dayLedger(k, childId);
+      cells.push({key:k, date:d, rec:r, earn:dl.earn, spend:dl.spend, net:dl.net, future:k > todayK});
       if(r){ done += r.done; pts += r.points; pctSum += r.pct; pctN++; if(r.pct >= 100) perfect++; }
+      spend += dl.spend;
     }
-    return {lead:lead, cells:cells, done:done, points:pts,
+    return {lead:lead, cells:cells, done:done, points:pts, spend:spend,
             avg: pctN ? Math.round(pctSum/pctN) : 0, pctN:pctN, perfect:perfect};
   }
 
@@ -1919,13 +2089,14 @@
           '<span class="' + bCls + '">' + badge + '</span>' +
           '<span class="wtrack"><span class="' + barCls + '" style="height:' + h + 'px"></span></span>' +
           '<span class="' + dCls + '">' + d.label + '<br>' + d.date.getDate() + '</span>' +
+          (d.spend ? '<span class="wspend">-' + d.spend + 'P</span>' : '') +
         '</button>';
       }).join('');
     }
     setText('wDone', w.done + '개');
     setText('wAvg', w.avg + '%');
     setText('wPts', w.points + 'P');
-    setText('weekAvgNote', '기록 ' + w.pctN + '일 기준 · 100% 완주 ' + w.perfect + '일');
+    setText('weekAvgNote', '기록 ' + w.pctN + '일 기준 · 100% 완주 ' + w.perfect + '일 · 사용 ' + w.spend + 'P');
   }
 
   function renderMonth(c){
@@ -1953,7 +2124,10 @@
       var cls = 'mcell';
       var inner = '<span class="mnum">' + cell.date.getDate() + '</span>';
       if(cell.future){ cls += ' future'; }
-      else if(!r){ cls += ' none'; }
+      else if(!r){
+        cls += ' none';
+        if(cell.spend) inner += '<span class="mpct sp">-' + cell.spend + 'P</span>';
+      }
       else if(r.pct >= 100){ cls += ' full'; inner += '<span class="mstar">✓</span>'; }
       else if(r.pct > 0){ cls += ' part'; inner += '<span class="mpct">' + r.pct + '%</span>'; }
       else { cls += ' none'; if(r.points) inner += '<span class="mpct">' + r.points + 'P</span>'; }
@@ -1967,7 +2141,7 @@
     setText('mAvg', mr.avg + '%');
     setText('mPerfect', mr.perfect + '일');
     setText('mPts', mr.points + 'P');
-    setText('monthAvgNote', '기록 ' + mr.pctN + '일 기준 · 총 완료 ' + mr.done + '개');
+    setText('monthAvgNote', '기록 ' + mr.pctN + '일 기준 · 총 완료 ' + mr.done + '개 · 사용 ' + mr.spend + 'P');
     renderDayDetail(c);
   }
 
@@ -1976,31 +2150,42 @@
     if(!el) return;
     var k = ui.selDay;
     var d = parseDayKey(k);
-    if(!d){ el.innerHTML = '<div class="hint">날짜를 누르면 그날 완료한 항목을 볼 수 있어요.</div>'; return; }
+    if(!d){ el.innerHTML = '<div class="hint">날짜를 누르면 그날 완료한 항목과 보상 사용 내역을 볼 수 있어요.</div>'; return; }
     var r = recordOf(k, c.id);
+    var dl = dayLedger(k, c.id);
+    /* 완료 항목은 위에서, 그날의 보상 신청·차감·환불은 따로 모아 보여 준다 */
+    var extras = dl.entries.filter(function(e){ return e.type !== 'earn'; });
     var head = '<div class="ddhead"><b>' + (d.getMonth()+1) + '월 ' + d.getDate() + '일 ' + WD[d.getDay()] + '요일</b>' +
                '<span>' + esc(c.emoji) + ' ' + esc(c.name) + '</span></div>';
     if(k > currentDay){
       el.innerHTML = head + '<div class="hint" style="padding:2px 0 4px">아직 오지 않은 날이에요.</div>';
       return;
     }
-    if(!r){
+    if(!r && !dl.entries.length){
       el.innerHTML = head + '<div class="hint" style="padding:2px 0 4px">' +
         (k === currentDay ? '오늘은 아직 체크한 항목이 없어요. 계획을 체크하면 이곳에 기록이 남아요.'
                           : '이 날은 체크한 항목이 없어요. 오늘의 계획을 체크하면 그날 기록이 이곳에 남아요.') +
         '</div>';
       return;
     }
+    var netCls = dl.net > 0 ? '' : (dl.net < 0 ? ' minus' : '');
     var chips = '<div class="ddstat">' +
-      '<span class="ddchip">' + r.done + '/' + r.total + ' 완료</span>' +
-      '<span class="ddchip">' + r.pct + '% 달성</span>' +
-      '<span class="ddchip">+' + r.points + 'P</span>' +
-      (r.pct >= 100 ? '<span class="ddchip gold">🏅 100% 완주</span>' : '') +
+      (r ? '<span class="ddchip">' + r.done + '/' + r.total + ' 완료</span>' +
+           '<span class="ddchip">' + r.pct + '% 달성</span>'
+         : '<span class="ddchip plain">완료한 항목 없음</span>') +
+      '<span class="ddchip">+' + dl.earn + 'P 적립</span>' +
+      (dl.spend ? '<span class="ddchip minus">-' + dl.spend + 'P 차감</span>' : '') +
+      '<span class="ddchip net' + netCls + '">순 ' + (dl.net > 0 ? '+' : '') + dl.net + 'P</span>' +
+      (r && r.pct >= 100 ? '<span class="ddchip gold">🏅 100% 완주</span>' : '') +
       '</div>';
-    var items = (r.items && r.items.length) ? r.items.map(function(t){
+    var items = (r && r.items && r.items.length) ? r.items.map(function(t){
       return '<div class="dditem"><span class="dcheck">✓</span><span>' + esc(t) + '</span></div>';
     }).join('') : '<div class="hint" style="padding:2px 0 4px">이 날 완료한 항목이 없어요.</div>';
-    el.innerHTML = head + chips + items;
+    var extraHTML = extras.length
+      ? '<div class="ddsub">🎁 보상 신청·차감 내역 <span>' + extras.length + '건 · 사용 ' + dl.spend + 'P</span></div>' +
+        extras.map(function(e){ return entryRowHTML(e); }).join('')
+      : '';
+    el.innerHTML = head + chips + items + extraHTML;
   }
 
   /* ═══════════ 진행도 저장 (CSV · 텍스트 리포트) ═══════════ */
@@ -2461,6 +2646,7 @@
            다른 기기에 있던 기록을 덮어쓸 수 있다. */
         if(!row || !row.state) return false;
         c0.verified = true;
+        var beforePend = pendingRequests().length;   /* 이번에 받아 오기 전 대기 건수 (새 신청 알림用) */
         var at = Date.parse(row.updated_at || '') || Number(row.state.updatedAt) || 0;
         var seen = Number(cloudCfg().lastPulledAt) || 0;
         if(at && at <= seen) return false;            /* 이미 받은 버전이면 그대로 */
@@ -2482,7 +2668,12 @@
         keep.verified = true;
         save(true);
         render();
-        if(!silent) toast(fixed ? '☁️ 최신 기록을 받고 📷 사진 없는 ' + fixed + '개 체크를 되돌렸어요' : '☁️ 클라우드에서 최신 기록을 받았어요');
+        var newPend = pendingRequests().length - beforePend;
+        if(newPend > 0){
+          toast('📱 새 보상 신청 ' + newPend + '건이 도착했어요 · 부모 모드에서 확인하세요', 'big');
+        } else if(!silent){
+          toast(fixed ? '☁️ 최신 기록을 받고 📷 사진 없는 ' + fixed + '개 체크를 되돌렸어요' : '☁️ 클라우드에서 최신 기록을 받았어요');
+        }
         return true;
       })
       .catch(function(e){ markCloudError(e); return false; });
@@ -2692,6 +2883,19 @@
   /* ═══════════ 📱 핸드폰 보상 신청 내역 (부모) ═══════════ */
   function gasBadge(n){ return '<span class="dk-badge">📱 대기 ' + n + '</span>'; }
 
+  /* 부모 모드 맨 위에 놓는 대기 요약 (앱을 열면 바로 보인다) */
+  function pendingAlertHTML(){
+    var p = pendingRequests();
+    if(!p.length) return '';
+    var mins = p.reduce(function(n,q){ return n + q.minutes; }, 0);
+    var who = [];
+    p.forEach(function(q){ var n = kid(q.childId).name; if(who.indexOf(n) < 0) who.push(n); });
+    return '<div class="pendbtn" style="cursor:default">' +
+      '<span class="pbe">📱</span>' +
+      '<span class="pbt">' + esc(who.join('·')) + ' · 보상 신청 <b>' + p.length + '건</b> 대기 중 (' + mins + '분)</span>' +
+      '<span class="pbc">아래에서 확인</span></div>';
+  }
+
   function requestsHTML(){
     var all = (state.requests || []).slice().sort(function(a,b){ return b.ts - a.ts; });
     var pend = pendingRequests();
@@ -2842,6 +3046,7 @@
     }).join('');
 
     panel.innerHTML =
+      (pendingRequests().length ? '<div class="section" style="margin-top:14px;margin-bottom:-2px">' + pendingAlertHTML() + '</div>' : '') +
       '<div class="section" style="margin-top:14px">' + dashHTML() + '</div>' +
       '<div class="card pcard">' + requestsHTML() + '</div>' +
       photosHTML() +
@@ -2961,7 +3166,8 @@
           '• 📱 <b>핸드폰 사용시간</b> 보상은 시간(분)과 포인트를 정해 두면, 아이가 신청할 때 <b>보상 신청 내역</b>에 대기로 뜽요. 지호·지윤은 패밀리 링크, 지민은 아이폰 스크린 타임에서 시간을 넣고 <b>반영 완료</b>를 누르세요.<br>' +
           '• <b>아이폰에서 앱처럼 쓰기</b>: 사파리로 열고 → 공유 버튼 → ‘홈 화면에 추가’.<br>' +
           '• 처음 부모 모드 PIN은 <b>0000</b>이고 이 화면에서 바꿀 수 있어요.<br>' +
-          '• 기록 탭에서 <b>일별·주간·월간</b> 진행도를 넘겨 볼 수 있어요. 월간 달력의 날짜를 누르면 그날 완료한 항목이 보여요.<br>' +
+          '• 기록 탭에서 <b>일별·주간·월간</b> 진행도를 넘겨 볼 수 있어요. 일별은 날짜마다 <b>+적립 / -차감 / 순합계</b>를 묶어 보여 주고, 주간·월간에서 날짜를 누르면 그날 보상 신청·차감 내역까지 나와요.<br>' +
+          '• 아이가 📱 보상을 신청하면 위쪽 부모 모드 버튼에 <b>빨간 대기 배지</b>가 바로 떠요. 부모 모드에서 <b>반영 완료</b>를 누르면 사라져요.<br>' +
           '• 진행도는 그날 상태를 저장해 두기 때문에, 나중에 계획 항목을 고치거나 지워도 지난 주·달 기록은 그대로 남아요.<br>' +
           '• 기록 탭이나 이 화면에서 <b>CSV·텍스트 리포트</b>로 진행도를 저장할 수 있어요.<br>' +
           '• 기록은 이 기기 브라우저에 저장돼요. 기기를 바꾸면 백업 파일로 옮겨 주세요.' +
@@ -3575,6 +3781,16 @@
        (이 기기 변경이 곧 올라갈 차례거나 동기화 중이면 건너뛴다) */
     if(cloudReady() && !cloudCfg().needsSetup && !ui.cloudBusy && !cloudPushTimer) cloudPull(true);
   });
+
+  /* v9: 아이가 다른 폰에서 보상을 신청해도, 부모가 앱을 열어 둔 동안 상단 대기 배지가
+     곧바로 바뀌도록 60초마다 조용히 최신 기록을 확인한다.
+     (이 기기에서 올릴 내용이 있거나 동기화 중이면 건너뛴다) */
+  setInterval(function(){
+    if(document.hidden) return;
+    if(!cloudReady() || cloudCfg().needsSetup) return;
+    if(ui.cloudBusy || cloudPushTimer || cloudPullBusy) return;
+    cloudPull(true);
+  }, 60000);
 
   /* 시작 */
   render();
